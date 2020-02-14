@@ -1,4 +1,4 @@
 package org.allesoft.simple_scheduler;
 
-public class Scheduler {
+public interface Penalty {
 }
