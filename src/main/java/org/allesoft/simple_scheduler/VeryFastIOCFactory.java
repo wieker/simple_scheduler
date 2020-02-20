@@ -1,4 +1,6 @@
 package org.allesoft.simple_scheduler;
 
-public interface VeryFastIOCFactory {
+import org.springframework.beans.factory.BeanFactory;
+
+public interface VeryFastIOCFactory extends BeanFactory {
 }
