@@ -8,7 +8,9 @@ public class SpringMain {
     public static void main(String[] args) {
         AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
         context.scan("org.allesoft.simple_scheduler.scan");
+        context.registerBean("schedulerProcessor", SchedulerAwareBeanPostProcessor.class);
         context.refresh();
-        ((ScanComponent)context.getBean("scanComponent")).hello();
+        ScanComponent scanComponent = (ScanComponent) context.getBean("scanComponent");
+        scanComponent.hello();
     }
 }
