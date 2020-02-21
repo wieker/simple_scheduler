@@ -1,11 +1,10 @@
 package org.allesoft.simple_scheduler;
 
-import java.sql.Driver;
 import java.util.Collection;
 import java.util.List;
 
 public interface Snapshot {
-    Collection<Driver> getDrivers();
+    Collection<Worker> getDrivers();
 
     Collection<Job> getJobs();
 
