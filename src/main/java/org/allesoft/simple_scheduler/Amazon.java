@@ -1,5 +1,6 @@
 package org.allesoft.simple_scheduler;
 
+import java.lang.reflect.Array;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -12,8 +13,8 @@ public class Amazon {
                                               List<String> featureRequests)
     {
         // WRITE YOUR CODE HERE
-        List<List<String>> filteredR = featureRequests.subList(0, numFeatureRequests).stream()
-                .map(String::toLowerCase).map(s -> Arrays.asList(s.split(" "))).collect(Collectors.toList());
+        List<Set<String>> filteredR = featureRequests.subList(0, numFeatureRequests).stream()
+                .map(String::toLowerCase).map(s -> new HashSet<String>(Arrays.asList(s.split("[\\p{Punct}\\s]+")))).collect(Collectors.toList());
 
         List<String> filteredP = possibleFeatures.stream()
                 .map(String::toLowerCase).collect(Collectors.toList());
@@ -108,6 +109,7 @@ public class Amazon {
     }
 
     public static void main(String[] args) {
-
+        System.out.println(new Amazon().popularNFeatures(3, 2,
+                Arrays.asList("battery", "calendar", "arm"), 3, Arrays.asList("more battery,,", "more arm,,,,", "more arm.")));
     }
 }
