@@ -1,28 +1,25 @@
-package org.allesoft.simple_scheduler;
+package org.allesoft.simple_scheduler.acm_sgu_ru;
 
-import java.lang.reflect.Array;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class Amazon {
-    // METHOD SIGNATURE BEGINS, THIS METHOD IS REQUIRED
-    public ArrayList<String> popularNFeatures(int numFeatures,
-                                              int topFeatures,
-                                              List<String> possibleFeatures,
-                                              int numFeatureRequests,
-                                              List<String> featureRequests)
+public class Algorithms {
+    public ArrayList<String> findByWords(int numWords,
+                                         int topWords,
+                                         List<String> wordsToSearch,
+                                         int numWhereToSearch,
+                                         List<String> whereToSearch)
     {
-        // WRITE YOUR CODE HERE
-        List<Set<String>> filteredR = featureRequests.subList(0, numFeatureRequests).stream()
+        List<Set<String>> preprocessedText = whereToSearch.subList(0, numWhereToSearch).stream()
                 .map(String::toLowerCase).map(s -> new HashSet<String>(Arrays.asList(s.split("[\\p{Punct}\\s]+")))).collect(Collectors.toList());
 
-        List<String> filteredP = possibleFeatures.stream()
+        List<String> preprocessedPatterns = wordsToSearch.stream()
                 .map(String::toLowerCase).collect(Collectors.toList());
         Map<String, Integer> counter = new HashMap<>();
-        filteredP.forEach(e -> {
-            counter.put(e, (int) filteredR.stream().filter(s -> s.contains(e)).count());
+        preprocessedPatterns.forEach(e -> {
+            counter.put(e, (int) preprocessedText.stream().filter(s -> s.contains(e)).count());
         });
-        filteredP.sort((s, t1) -> {
+        preprocessedPatterns.sort((s, t1) -> {
             int iComp = counter.get(s).compareTo(counter.get(t1));
             if (iComp == 0) {
                 return s.compareTo(t1);
@@ -30,14 +27,13 @@ public class Amazon {
                 return -iComp;
             }
         });
-        System.out.println(counter);
         ArrayList<String> result = new ArrayList<>();
-        for (int i = 0; i < topFeatures && i < numFeatures; i ++) {
-            String o = filteredP.get(i);
+        for (int i = 0; i < topWords && i < numWords; i ++) {
+            String o = preprocessedPatterns.get(i);
             Integer feature = counter.get(o);
             if (feature > 0) {
                 // Return with the original case
-                result.add(possibleFeatures.stream().filter(o::equalsIgnoreCase).findFirst().orElse("impossible"));
+                result.add(wordsToSearch.stream().filter(o::equalsIgnoreCase).findFirst().orElse("impossible"));
             } else {
                 break;
             }
@@ -51,13 +47,12 @@ public class Amazon {
         int t;
     }
 
-    int minimumHours(int rows, int columns, List<List<Integer> > grid)
+    int widthSearchLength(int rows, int columns, List<List<Integer>> matrix)
     {
-        // WRITE YOUR CODE HERE
         List<Point> points = new ArrayList<>();
         for (int i = 0; i < rows; i ++) {
             for (int j = 0; j < columns; j ++) {
-                if (grid.get(i).get(j) == 1) {
+                if (matrix.get(i).get(j) == 1) {
                     Point point = new Point();
                     point.x = i;
                     point.y = j;
@@ -72,36 +67,36 @@ public class Amazon {
                 return points.get(points.size() - 1).t;
             }
             Point current = points.get(i);
-            if (current.x > 0 && grid.get(current.x - 1).get(current.y) == 0) {
+            if (current.x > 0 && matrix.get(current.x - 1).get(current.y) == 0) {
                 Point point = new Point();
                 point.x = current.x - 1;
                 point.y = current.y;
                 point.t = current.t + 1;
-                grid.get(current.x - 1).set(current.y, 1);
+                matrix.get(current.x - 1).set(current.y, 1);
                 points.add(point);
             }
-            if (current.y > 0 && grid.get(current.x).get(current.y - 1) == 0) {
+            if (current.y > 0 && matrix.get(current.x).get(current.y - 1) == 0) {
                 Point point = new Point();
                 point.x = current.x;
                 point.y = current.y - 1;
                 point.t = current.t + 1;
-                grid.get(current.x).set(current.y - 1, 1);
+                matrix.get(current.x).set(current.y - 1, 1);
                 points.add(point);
             }
-            if (current.x < rows - 1 && grid.get(current.x + 1).get(current.y) == 0) {
+            if (current.x < rows - 1 && matrix.get(current.x + 1).get(current.y) == 0) {
                 Point point = new Point();
                 point.x = current.x + 1;
                 point.y = current.y;
                 point.t = current.t + 1;
-                grid.get(current.x + 1).set(current.y, 1);
+                matrix.get(current.x + 1).set(current.y, 1);
                 points.add(point);
             }
-            if (current.y < columns - 1 && grid.get(current.x).get(current.y + 1) == 0) {
+            if (current.y < columns - 1 && matrix.get(current.x).get(current.y + 1) == 0) {
                 Point point = new Point();
                 point.x = current.x;
                 point.y = current.y + 1;
                 point.t = current.t + 1;
-                grid.get(current.x).set(current.y + 1, 1);
+                matrix.get(current.x).set(current.y + 1, 1);
                 points.add(point);
             }
         }
@@ -109,7 +104,7 @@ public class Amazon {
     }
 
     public static void main(String[] args) {
-        System.out.println(new Amazon().popularNFeatures(3, 2,
-                Arrays.asList("battery", "calendar", "arm"), 3, Arrays.asList("more battery,,", "more arm,,,,", "more arm.")));
+        System.out.println(new Algorithms().findByWords(3, 2,
+                Arrays.asList("some1", "some2", "some3"), 3, Arrays.asList("1111 some1,,", "1111 some2,,,,", "1111 some3.")));
     }
 }
