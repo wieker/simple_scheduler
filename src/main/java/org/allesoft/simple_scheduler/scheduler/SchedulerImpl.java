@@ -22,6 +22,40 @@ public class SchedulerImpl implements Scheduler {
 
     @Override
     public void run() {
+        routingService = new RoutingService() {
+            @Override
+            public Route getRoute(GeoPoint from, GeoPoint to) {
+                return new Route() {
+                    @Override
+                    public double distance() {
+                        return 0;
+                    }
+
+                    @Override
+                    public double time() {
+                        return 0;
+                    }
+                };
+            }
+        };
+
+        optionCalculationCache = new OptionCalculationCache() {
+            @Override
+            public Option getOption(Job job, Worker driver) {
+                return new Option() {
+                    @Override
+                    public double calculate() {
+                        return 0;
+                    }
+                };
+            }
+
+            @Override
+            public void setRoutingService(RoutingService routingService) {
+
+            }
+        };
+
         optionCalculationCache.setRoutingService(routingService);
         List<Double> matrix = snapshot.getJobs().parallelStream()
                 .flatMap(job -> snapshot.getDrivers().parallelStream()
