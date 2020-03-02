@@ -9,12 +9,48 @@ public class Algorithm implements AlgorithmService {
     public int[] allocateMatrix(double[][] matrix) {
         int[] result = new int[matrix.length];
 
-        step1(matrix);
+        decrement_rows(matrix);
 
-        step2(matrix);
+        decrement_columns(matrix);
 
-        int[] crossed_column = new int[matrix.length];
         int[] assigned_row = new int[matrix.length];
+        find_all_zeros(matrix, assigned_row);
+
+        real_allocate(matrix, result);
+
+        return result;
+    }
+
+    // is it N!??? something is going wrong
+    private void real_allocate(double[][] matrix, int[] possible_allocations) {
+        int[] allocated = new int[matrix.length];
+        int pos = 0;
+        Arrays.fill(possible_allocations, -1);
+        while (pos < matrix.length) {
+            boolean restart = true;
+            for (int i = possible_allocations[pos] + 1; i < matrix[pos].length; i ++) {
+                if (possible_allocations[pos] > -1) {
+                    allocated[possible_allocations[pos]] = 0;
+                }
+                if (matrix[pos][i] == 0 && allocated[i] != 1) {
+                    possible_allocations[pos] = i;
+                    allocated[i] = 1;
+                    pos ++;
+                    restart = false;
+                    break;
+                }
+            }
+
+            if (restart) {
+                possible_allocations[pos] = -1;
+                pos--;
+            }
+        }
+        show_marked_rows(matrix, possible_allocations);
+    }
+
+    private void find_all_zeros(double[][] matrix, int[] assigned_row) {
+        int[] crossed_column = new int[matrix.length];
         Arrays.fill(assigned_row, -1);
         for (int i = 0; i < matrix.length; i ++) {
             for (int j = 0; j < matrix.length; j ++) {
@@ -56,9 +92,6 @@ public class Algorithm implements AlgorithmService {
             }
             show_marked_rows(matrix, mark_row_without_assign);
         } while (marked);
-
-
-        return result;
     }
 
     private void show_marked_rows(double[][] matrix, int[] mark_row_without_assign) {
@@ -68,7 +101,7 @@ public class Algorithm implements AlgorithmService {
         System.out.println();
     }
 
-    private void step2(double[][] matrix) {
+    private void decrement_columns(double[][] matrix) {
         for (int i = 0; i < matrix[0].length; i ++) {
             double min = matrix[0][i];
             for (double[] doubles : matrix) {
@@ -82,7 +115,7 @@ public class Algorithm implements AlgorithmService {
         }
     }
 
-    private void step1(double[][] matrix) {
+    private void decrement_rows(double[][] matrix) {
         for (int i = 0; i < matrix.length; i ++) {
             double min = matrix[i][0];
             for (int j = 0; j < matrix[i].length; j ++) {
