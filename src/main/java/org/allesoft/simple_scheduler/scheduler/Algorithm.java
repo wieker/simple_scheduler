@@ -25,52 +25,55 @@ public class Algorithm implements AlgorithmService {
                 }
             }
         }
+        show_marked_rows(matrix, assigned_row);
 
-        int[] mark_row = new int[matrix.length];
+        int[] mark_row_without_assign = new int[matrix.length];
         for (int i = 0; i < matrix.length; i ++) {
             if (assigned_row[i] == -1) {
-                mark_row[i] = 1;
+                mark_row_without_assign[i] = 1;
             }
         }
+        show_marked_rows(matrix, mark_row_without_assign);
         boolean marked;
-        int[] mark_col = new int[matrix[0].length];
+        int[] mark_col_having_zero_in_marked_rows = new int[matrix[0].length];
         do {
             marked = false;
             for (int i = 0; i < matrix.length; i ++) {
                 for (int j = 0; j < matrix[0].length; j ++) {
-                    if (mark_col[j] == 0 && mark_row[i] == 1 && matrix[i][j] == 0) {
-                        mark_col[j] = 1;
+                    if (mark_col_having_zero_in_marked_rows[j] == 0 && mark_row_without_assign[i] == 1 && matrix[i][j] == 0) {
+                        mark_col_having_zero_in_marked_rows[j] = 1;
                         marked = true;
                     }
                 }
             }
+            show_marked_rows(matrix, mark_col_having_zero_in_marked_rows);
             for (int i = 0; i < matrix.length; i ++) {
-                if (assigned_row[i] != -1 && mark_col[assigned_row[i]] == 1 &&
-                        mark_row[i] == 0) {
-                    mark_row[i] = 1;
+                if (assigned_row[i] != -1 && mark_col_having_zero_in_marked_rows[assigned_row[i]] == 1 &&
+                        mark_row_without_assign[i] == 0) {
+                    mark_row_without_assign[i] = 1;
                     marked = true;
                 }
             }
+            show_marked_rows(matrix, mark_row_without_assign);
         } while (marked);
 
-        for (int i = 0; i < matrix.length; i ++) {
-            System.out.print(assigned_row[i] + " ");
-        }
-        System.out.println();
-        for (int i = 0; i < matrix.length; i ++) {
-            System.out.print(mark_row[i] + " ");
-        }
-        System.out.println();
 
         return result;
+    }
+
+    private void show_marked_rows(double[][] matrix, int[] mark_row_without_assign) {
+        for (int i = 0; i < matrix.length; i++) {
+            System.out.print(mark_row_without_assign[i] + " ");
+        }
+        System.out.println();
     }
 
     private void step2(double[][] matrix) {
         for (int i = 0; i < matrix[0].length; i ++) {
             double min = matrix[0][i];
-            for (int j = 0; j < matrix.length; j ++) {
-                if (min < matrix[j][i]) {
-                    min = matrix[j][i];
+            for (double[] doubles : matrix) {
+                if (min > doubles[i]) {
+                    min = doubles[i];
                 }
             }
             for (int j = 0; j < matrix.length; j ++) {
@@ -83,7 +86,7 @@ public class Algorithm implements AlgorithmService {
         for (int i = 0; i < matrix.length; i ++) {
             double min = matrix[i][0];
             for (int j = 0; j < matrix[i].length; j ++) {
-                if (min < matrix[i][j]) {
+                if (min > matrix[i][j]) {
                     min = matrix[i][j];
                 }
             }
@@ -96,8 +99,8 @@ public class Algorithm implements AlgorithmService {
     public static void main(String[] args) {
         Algorithm algorithm = new Algorithm();
         algorithm.allocateMatrix(new double[][] {
-                {2, 2},
-                {2, 1},
+                {2, 3},
+                {2, 4},
         });
     }
 }
