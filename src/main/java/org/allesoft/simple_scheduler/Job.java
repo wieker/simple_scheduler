@@ -1,4 +1,6 @@
 package org.allesoft.simple_scheduler;
 
-public interface Job {
+import org.allesoft.simple_scheduler.scheduler.Identified;
+
+public interface Job extends GeoPoint, Identified {
 }

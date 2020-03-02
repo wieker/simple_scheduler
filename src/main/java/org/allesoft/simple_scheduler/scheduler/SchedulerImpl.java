@@ -4,7 +4,11 @@ import org.allesoft.simple_scheduler.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
@@ -20,34 +24,52 @@ public class SchedulerImpl implements Scheduler {
 
     Snapshot snapshot;
 
+    public static double sqr(double a) {
+        return a * a;
+    }
+
     @Override
     public void run() {
-        routingService = new RoutingService() {
+        routingService = (from, to) -> new Route() {
             @Override
-            public Route getRoute(GeoPoint from, GeoPoint to) {
-                return new Route() {
-                    @Override
-                    public double distance() {
-                        return 0;
-                    }
+            public double distance() {
+                return Math.sqrt(
+                        sqr(from.lat() - to.lat()) + sqr(from.lon() - to.lon()));
+            }
 
-                    @Override
-                    public double time() {
-                        return 0;
-                    }
-                };
+            @Override
+            public double time() {
+                return 0;
             }
         };
 
         optionCalculationCache = new OptionCalculationCache() {
+            Map<Long, Map<Long, Option>> options = new HashMap<>();
+
             @Override
             public Option getOption(Job job, Worker driver) {
-                return new Option() {
+                options.computeIfAbsent(job.getId(), k -> new HashMap<>());
+                if (options.get(job.getId()).get(driver.getId()) != null) {
+                    return options.get(job.getId()).get(driver.getId());
+                }
+                Option option = new Option() {
                     @Override
                     public double calculate() {
-                        return 0;
+                        return routingService.getRoute(job, driver).distance() * 1.0f;
+                    }
+
+                    @Override
+                    public Job getJob() {
+                        return job;
+                    }
+
+                    @Override
+                    public Worker getWorker() {
+                        return driver;
                     }
                 };
+                options.get(job.getId()).put(driver.getId(), option);
+                return option;
             }
 
             @Override
@@ -56,15 +78,95 @@ public class SchedulerImpl implements Scheduler {
             }
         };
 
+        algorithmService = matrix -> new int[]{1};
+
         optionCalculationCache.setRoutingService(routingService);
-        List<Double> matrix = snapshot.getJobs().parallelStream()
-                .flatMap(job -> snapshot.getDrivers().parallelStream()
+        Collection<Job> jobs = snapshot.getJobs();
+        Collection<Worker> drivers = snapshot.getDrivers();
+        List<Double> forMatrix = jobs.parallelStream()
+                .flatMap(job -> drivers.parallelStream()
                         .map(driver -> optionCalculationCache.getOption(job, driver)))
                 .map(Option::calculate).collect(Collectors.toList());
-        // algorithmService.allocate();
+        double[][] matrix = new double[jobs.size()][drivers.size()];
+        int i = 0;
+        int j = 0;
+        for (Job job : jobs) {
+            for (Worker driver : drivers) {
+                matrix[i][j] = optionCalculationCache.getOption(job, driver).calculate();
+                j ++;
+            }
+            i ++;
+        }
+        algorithmService.allocateMatrix(matrix);
     }
 
+    @Override
     public void setSnapshot(Snapshot snapshot) {
         this.snapshot = snapshot;
+    }
+
+    public static void main(String[] args) {
+        Scheduler scheduler = new SchedulerImpl();
+        scheduler.setSnapshot(new Snapshot() {
+            @Override
+            public Collection<Worker> getDrivers() {
+                return Arrays.asList(new Worker() {
+                    @Override
+                    public double lat() {
+                        return 0;
+                    }
+
+                    @Override
+                    public double lon() {
+                        return 0;
+                    }
+
+                    @Override
+                    public Long getId() {
+                        return 2l;
+                    }
+                }, new Worker() {
+                    @Override
+                    public double lat() {
+                        return 1;
+                    }
+
+                    @Override
+                    public double lon() {
+                        return 0;
+                    }
+
+                    @Override
+                    public Long getId() {
+                        return 2l;
+                    }
+                });
+            }
+
+            @Override
+            public Collection<Job> getJobs() {
+                return Arrays.asList(new Job() {
+                    @Override
+                    public double lat() {
+                        return 1;
+                    }
+
+                    @Override
+                    public double lon() {
+                        return 1;
+                    }
+
+                    @Override
+                    public Long getId() {
+                        return 1l;
+                    }
+                });
+            }
+
+            @Override
+            public List<Penalty> getPenalties() {
+                return null;
+            }
+        });
     }
 }
