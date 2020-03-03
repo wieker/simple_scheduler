@@ -12,9 +12,45 @@ public class Algorithm implements AlgorithmService {
         decrement_rows(matrix);
 
         decrement_columns(matrix);
+        int num_rows = 0;
 
-        int[] assigned_row = new int[matrix.length];
-        find_all_zeros(matrix, assigned_row);
+        do {
+            num_rows = 0;
+            int[] assigned_row = new int[matrix.length];
+            int[] mark_row_without_assign = new int[matrix.length];
+            int[] mark_col_having_zero_in_marked_rows = new int[matrix[0].length];
+            find_all_zeros(matrix, assigned_row, mark_row_without_assign, mark_col_having_zero_in_marked_rows);
+            for (int i = 0; i < matrix.length; i++) {
+                if (mark_row_without_assign[i] == 1) {
+                    num_rows++;
+                }
+            }
+            if (num_rows < matrix.length) {
+                double min = matrix[0][0];
+                for (int i = 0; i < matrix.length; i ++) {
+                    for (int j = 0; j < matrix[i].length; j ++) {
+                        if (mark_row_without_assign[i] == 0 &&
+                                mark_col_having_zero_in_marked_rows[j] == 1 &&
+                                min > matrix[i][j]) {
+                            min = matrix[i][j];
+                        }
+                    }
+                }
+                for (int i = 0; i < matrix.length; i ++) {
+                    for (int j = 0; j < matrix[i].length; j ++) {
+                        if (mark_row_without_assign[i] == 0 &&
+                                mark_col_having_zero_in_marked_rows[j] == 1) {
+                            matrix[i][j] -= min;
+                        }
+                        if (mark_row_without_assign[i] == 1 &&
+                                mark_col_having_zero_in_marked_rows[j] == 1) {
+                            matrix[i][j] += min;
+                        }
+                    }
+                }
+            }
+        } while (num_rows < matrix.length);
+
 
         real_allocate(matrix, result);
 
@@ -49,7 +85,7 @@ public class Algorithm implements AlgorithmService {
         show_marked_rows(matrix, possible_allocations);
     }
 
-    private void find_all_zeros(double[][] matrix, int[] assigned_row) {
+    private void find_all_zeros(double[][] matrix, int[] assigned_row, int[] mark_row_without_assign, int[] mark_col_having_zero_in_marked_rows) {
         int[] crossed_column = new int[matrix.length];
         Arrays.fill(assigned_row, -1);
         for (int i = 0; i < matrix.length; i ++) {
@@ -63,7 +99,6 @@ public class Algorithm implements AlgorithmService {
         }
         show_marked_rows(matrix, assigned_row);
 
-        int[] mark_row_without_assign = new int[matrix.length];
         for (int i = 0; i < matrix.length; i ++) {
             if (assigned_row[i] == -1) {
                 mark_row_without_assign[i] = 1;
@@ -71,7 +106,6 @@ public class Algorithm implements AlgorithmService {
         }
         show_marked_rows(matrix, mark_row_without_assign);
         boolean marked;
-        int[] mark_col_having_zero_in_marked_rows = new int[matrix[0].length];
         do {
             marked = false;
             for (int i = 0; i < matrix.length; i ++) {
