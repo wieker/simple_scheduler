@@ -78,15 +78,14 @@ public class SchedulerImpl implements Scheduler {
             }
         };
 
-        algorithmService = matrix -> new int[]{1};
+        algorithmService = matrix -> new Algorithm().allocateMatrix(matrix);
 
         optionCalculationCache.setRoutingService(routingService);
         Collection<Job> jobs = snapshot.getJobs();
         Collection<Worker> drivers = snapshot.getDrivers();
-        List<Double> forMatrix = jobs.parallelStream()
-                .flatMap(job -> drivers.parallelStream()
-                        .map(driver -> optionCalculationCache.getOption(job, driver)))
-                .map(Option::calculate).collect(Collectors.toList());
+        jobs.forEach(job ->
+                drivers.forEach(driver ->
+                        optionCalculationCache.getOption(job, driver)));
         double[][] matrix = new double[jobs.size()][drivers.size()];
         int i = 0;
         int j = 0;
