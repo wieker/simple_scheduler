@@ -4,11 +4,7 @@ import org.allesoft.simple_scheduler.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -50,6 +46,11 @@ public class SchedulerImpl implements Scheduler {
             @Override
             public GeoPoint to() {
                 return to;
+            }
+
+            @Override
+            public Date date() {
+                return null;
             }
         };
 

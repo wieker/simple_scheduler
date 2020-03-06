@@ -4,38 +4,52 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import org.allesoft.simple_scheduler.scheduler.Route;
 
+import java.util.Date;
+import java.util.concurrent.ConcurrentSkipListMap;
+
 import static org.allesoft.simple_scheduler.scheduler.SchedulerImpl.sqr;
 
 public class CaffeineApp {
     public static void main(String[] args) {
-        LoadingCache<Route, Route> cache = Caffeine.newBuilder().maximumSize(100_000_000).build(
-                key -> new Route() {
-                    @Override
-                    public double distance() {
-                        System.out.println("calculate");
-                        return Math.sqrt(
-                                sqr(key.from().lat() - key.to().lat()) + sqr(key.from().lon() - key.to().lon()));
-                    }
-
-                    @Override
-                    public double time() {
-                        return 0;
-                    }
-
-                    @Override
-                    public GeoPoint from() {
-                        return key.from();
-                    }
-
-                    @Override
-                    public GeoPoint to() {
-                        return key.to();
-                    }
-                }
+        LoadingCache<Route, ConcurrentSkipListMap<Date, Route>> cache = Caffeine.newBuilder().maximumSize(100_000_000).build(
+                key -> createTimeDependentCache(key)
         );
 
-        System.out.println(cache.get(getRoute(getGeoPoint(0, 0), getGeoPoint(1, 1))).distance());
-        System.out.println(cache.get(getRoute(getGeoPoint(0, 0), getGeoPoint(1, 1))).distance());
+        System.out.println(cache.get(getRoute(getGeoPoint(0, 0), getGeoPoint(1, 1))).floorEntry(new Date()).getValue().distance());
+        System.out.println(cache.get(getRoute(getGeoPoint(0, 0), getGeoPoint(1, 1))).floorEntry(new Date()).getValue().distance());
+    }
+
+    private static ConcurrentSkipListMap<Date, Route> createTimeDependentCache(Route route) {
+        ConcurrentSkipListMap<Date, Route> dateRouteConcurrentSkipListMap = new ConcurrentSkipListMap<>();
+        dateRouteConcurrentSkipListMap.put(route.date(), new Route() {
+            @Override
+            public double distance() {
+                System.out.println("calculate");
+                return Math.sqrt(
+                        sqr(route.from().lat() - route.to().lat()) + sqr(route.from().lon() - route.to().lon()));
+            }
+
+            @Override
+            public double time() {
+                return 0;
+            }
+
+            @Override
+            public GeoPoint from() {
+                return route.from();
+            }
+
+            @Override
+            public GeoPoint to() {
+                return route.to();
+            }
+
+            @Override
+            public Date date() {
+                return route.date();
+            }
+        });
+        return dateRouteConcurrentSkipListMap;
     }
 
     private static Route getRoute(final GeoPoint from, final GeoPoint to) {
@@ -58,6 +72,11 @@ public class CaffeineApp {
             @Override
             public GeoPoint to() {
                 return to;
+            }
+
+            @Override
+            public Date date() {
+                return new Date();
             }
         };
     }
