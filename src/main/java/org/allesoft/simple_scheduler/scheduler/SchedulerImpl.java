@@ -41,6 +41,16 @@ public class SchedulerImpl implements Scheduler {
             public double time() {
                 return 0;
             }
+
+            @Override
+            public GeoPoint from() {
+                return from;
+            }
+
+            @Override
+            public GeoPoint to() {
+                return to;
+            }
         };
 
         optionCalculationCache = new OptionCalculationCache() {
