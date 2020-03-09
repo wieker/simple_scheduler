@@ -11,6 +11,18 @@ import java.util.List;
 public class RepeatCptParser extends NamedCptParser {
     Parser child;
 
+    public RepeatCptParser() {
+    }
+
+    public RepeatCptParser(String name) {
+        super(name);
+    }
+
+    public RepeatCptParser(String name, Parser child) {
+        super(name);
+        this.child = child;
+    }
+
     public void setChild(Parser child) {
         this.child = child;
     }

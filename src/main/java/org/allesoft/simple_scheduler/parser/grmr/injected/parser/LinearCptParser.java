@@ -10,6 +10,18 @@ import java.util.List;
 public class LinearCptParser extends NamedCptParser {
     final List<Parser> parsers = new ArrayList<>();
 
+    public LinearCptParser() {
+    }
+
+    public LinearCptParser(String name) {
+        super(name);
+    }
+
+    public LinearCptParser(String name, List<Parser> parsers) {
+        super(name);
+        this.parsers.addAll(parsers);
+    }
+
     // to support injection of the recursive parsers
     public void setParsers(List<Parser> parsers) {
         this.parsers.addAll(parsers);

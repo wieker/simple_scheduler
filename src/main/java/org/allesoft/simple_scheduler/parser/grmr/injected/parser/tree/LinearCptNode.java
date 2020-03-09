@@ -13,6 +13,10 @@ public class LinearCptNode extends NamedCptNode {
         this.childs.addAll(childs);
     }
 
+    public List<SyntaxTree> getChilds() {
+        return childs;
+    }
+
     @Override
     public String toString() {
         StringBuilder str = new StringBuilder(name + " { ");

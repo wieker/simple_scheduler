@@ -7,6 +7,13 @@ import org.allesoft.simple_scheduler.parser.grmr.injected.parser.iostream.String
 import org.allesoft.simple_scheduler.parser.grmr.injected.parser.tree.SyntaxTree;
 
 public class IntParser extends NamedCptParser {
+    public IntParser() {
+    }
+
+    public IntParser(String name) {
+        super(name);
+    }
+
     @Override
     public SyntaxTree parse(LexerStream lexerStream) throws ParseException {
         LexerPoint begin = lexerStream.begin();

@@ -11,6 +11,10 @@ public class NamedCptNode implements SyntaxTree {
         this.parser = parser;
     }
 
+    public String getName() {
+        return name;
+    }
+
     @Override
     public String toString() {
         return name;

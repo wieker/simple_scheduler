@@ -1,5 +1,6 @@
 package org.allesoft.simple_scheduler.nrf52.mesh;
 
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -24,7 +25,7 @@ public class ThreadLocalArrayBackedQueue<T> {
         }
     }
 
-    public Object take() throws InterruptedException {
+    public Object take(int time) throws InterruptedException {
         lock.lock();
         try {
             Integer position;
@@ -35,7 +36,7 @@ public class ThreadLocalArrayBackedQueue<T> {
                 position = local.get();
             }
             while (position == putptr)
-                notEmpty.await();
+                notEmpty.await(time, TimeUnit.MILLISECONDS);
             Object x = items[position];
             int oldPosition = position;
             if (++position == items.length) {

@@ -1,5 +1,6 @@
 package org.allesoft.simple_scheduler.nrf52.mesh;
 
+import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -27,7 +28,7 @@ public class Emulate implements Runnable {
                 public void run() {
                     try {
                         for (;;) {
-                            System.out.println(queue.take());
+                            System.out.println(queue.take(new Random().nextInt(1000)));
                         }
                     } catch (InterruptedException e) {
                         e.printStackTrace();

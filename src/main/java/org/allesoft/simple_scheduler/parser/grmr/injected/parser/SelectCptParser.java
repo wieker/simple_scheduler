@@ -11,6 +11,14 @@ import java.util.List;
 public class SelectCptParser extends NamedCptParser {
     final List<Parser> parsers = new ArrayList<>();
 
+    public SelectCptParser() {
+    }
+
+    public SelectCptParser(String name, List<Parser> parsers) {
+        super(name);
+        this.parsers.addAll(parsers);
+    }
+
     // to support injection of the recursive parsers
     public void setParsers(List<Parser> parsers) {
         this.parsers.addAll(parsers);

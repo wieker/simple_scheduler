@@ -5,8 +5,22 @@ import org.allesoft.simple_scheduler.parser.grmr.injected.parser.iostream.LexerS
 import org.allesoft.simple_scheduler.parser.grmr.injected.parser.tree.OptionalCptNode;
 import org.allesoft.simple_scheduler.parser.grmr.injected.parser.tree.SyntaxTree;
 
+import java.util.List;
+
 public class OptionalCptParser extends NamedCptParser implements Parser {
     Parser next;
+
+    public OptionalCptParser() {
+    }
+
+    public OptionalCptParser(String name) {
+        super(name);
+    }
+
+    public OptionalCptParser(String name, Parser next) {
+        super(name);
+        this.next = next;
+    }
 
     public void setNext(Parser next) {
         this.next = next;
