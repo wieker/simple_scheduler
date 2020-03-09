@@ -1,4 +1,10 @@
-package org.allesoft.simple_scheduler.parser.grmr.injected;
+package org.allesoft.simple_scheduler.parser.grmr.injected.parser;
+
+import org.allesoft.simple_scheduler.parser.grmr.injected.parser.tree.IntNode;
+import org.allesoft.simple_scheduler.parser.grmr.injected.parser.iostream.LexerPoint;
+import org.allesoft.simple_scheduler.parser.grmr.injected.parser.iostream.LexerStream;
+import org.allesoft.simple_scheduler.parser.grmr.injected.parser.iostream.StringLexerStream;
+import org.allesoft.simple_scheduler.parser.grmr.injected.parser.tree.SyntaxTree;
 
 public class IntParser extends NamedCptParser {
     @Override

@@ -1,4 +1,6 @@
-package org.allesoft.simple_scheduler.parser.grmr.injected;
+package org.allesoft.simple_scheduler.parser.grmr.injected.parser.tree;
+
+import org.allesoft.simple_scheduler.parser.grmr.injected.parser.Parser;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,4 +1,6 @@
-package org.allesoft.simple_scheduler.parser.grmr.injected;
+package org.allesoft.simple_scheduler.parser.grmr.injected.parser;
+
+import org.allesoft.simple_scheduler.parser.grmr.injected.parser.Parser;
 
 public abstract class NamedCptParser implements Parser {
     protected String name;

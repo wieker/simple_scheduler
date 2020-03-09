@@ -1,4 +1,6 @@
-package org.allesoft.simple_scheduler.parser.grmr.injected;
+package org.allesoft.simple_scheduler.parser.grmr.injected.parser.iostream;
+
+import org.allesoft.simple_scheduler.parser.grmr.injected.parser.ParseException;
 
 public class StringLexerStream implements LexerStream {
     final String buffer;
