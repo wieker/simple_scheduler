@@ -7,7 +7,15 @@ public class LinearCptNode extends NamedCptNode {
     final List<SyntaxTree> childs = new ArrayList<>();
 
     public LinearCptNode(Parser parser, String name, List<SyntaxTree> childs) {
-        super(name, parser);
+        super(parser, name);
         this.childs.addAll(childs);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder str = new StringBuilder(name + " { ");
+        childs.forEach(c -> str.append(" ").append(c.toString()));
+        str.append(" } ");
+        return str.toString();
     }
 }

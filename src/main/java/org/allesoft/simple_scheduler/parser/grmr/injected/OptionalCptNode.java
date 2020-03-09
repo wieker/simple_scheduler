@@ -4,7 +4,7 @@ public class OptionalCptNode extends NamedCptNode {
     SyntaxTree child;
 
     public OptionalCptNode(Parser parser, String name, SyntaxTree child) {
-        super(name, parser);
+        super(parser, name);
         this.child = child;
     }
 }
