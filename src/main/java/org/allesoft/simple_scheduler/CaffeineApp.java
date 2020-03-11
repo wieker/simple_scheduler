@@ -7,7 +7,7 @@ import org.allesoft.simple_scheduler.scheduler.Route;
 import java.util.Date;
 import java.util.concurrent.ConcurrentSkipListMap;
 
-import static org.allesoft.simple_scheduler.scheduler.SchedulerImpl.sqr;
+import static org.allesoft.simple_scheduler.scheduler.SchedUtils.sqr;
 
 public class CaffeineApp {
     public static void main(String[] args) {
