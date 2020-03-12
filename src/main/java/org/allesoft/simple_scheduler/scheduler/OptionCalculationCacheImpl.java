@@ -4,6 +4,7 @@ import org.allesoft.simple_scheduler.Job;
 import org.allesoft.simple_scheduler.OptionCalculationCache;
 import org.allesoft.simple_scheduler.RoutingService;
 import org.allesoft.simple_scheduler.Worker;
+import org.allesoft.simple_scheduler.scheduler.structure.OptionImpl;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -22,22 +23,7 @@ class OptionCalculationCacheImpl implements OptionCalculationCache {
         if (options.get(job.getId()).get(driver.getId()) != null) {
             return options.get(job.getId()).get(driver.getId());
         }
-        Option option = new Option() {
-            @Override
-            public double calculate() {
-                return routingService.getRoute(job, driver).distance() * 1.0f;
-            }
-
-            @Override
-            public Job getJob() {
-                return job;
-            }
-
-            @Override
-            public Worker getWorker() {
-                return driver;
-            }
-        };
+        Option option = new OptionImpl(routingService, job, driver);
         options.get(job.getId()).put(driver.getId(), option);
         return option;
     }
@@ -46,4 +32,5 @@ class OptionCalculationCacheImpl implements OptionCalculationCache {
     public void setRoutingService(RoutingService routingService) {
 
     }
+
 }
