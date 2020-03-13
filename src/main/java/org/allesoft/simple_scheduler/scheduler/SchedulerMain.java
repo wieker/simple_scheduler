@@ -1,6 +1,7 @@
 package org.allesoft.simple_scheduler.scheduler;
 
 import org.allesoft.simple_scheduler.RoutingService;
+import org.allesoft.simple_scheduler.scheduler.tools.SingleThreadExecutionService;
 
 public class SchedulerMain {
     public static void main(String[] args) {
@@ -8,10 +9,11 @@ public class SchedulerMain {
         SnapshotProvider snapshotSupplier = new DbSnapshotProvider();
         Scheduler scheduler = new SchedulerImpl(matrix -> new Algorithm().allocateMatrix(matrix),
                 routingService,
-                null,
-                new OptionCalculationCacheImpl(routingService)
+                new SingleThreadExecutionService(),
+                new OptionCalculationCacheImpl(),
         );
         scheduler.setSnapshot(snapshotSupplier.loadSnapshot());
         scheduler.run();
     }
+
 }
