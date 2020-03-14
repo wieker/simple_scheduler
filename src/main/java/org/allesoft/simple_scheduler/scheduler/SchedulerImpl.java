@@ -1,6 +1,11 @@
 package org.allesoft.simple_scheduler.scheduler;
 
-import org.allesoft.simple_scheduler.*;
+import org.allesoft.simple_scheduler.AlgorithmService;
+import org.allesoft.simple_scheduler.scheduler.model.Job;
+import org.allesoft.simple_scheduler.OptionCalculationCache;
+import org.allesoft.simple_scheduler.Snapshot;
+import org.allesoft.simple_scheduler.TaskExecutorService;
+import org.allesoft.simple_scheduler.scheduler.model.Worker;
 import org.allesoft.simple_scheduler.scheduler.service.RoutingService;
 
 import java.util.*;

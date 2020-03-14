@@ -1,9 +1,9 @@
 package org.allesoft.simple_scheduler.scheduler.service;
 
-import org.allesoft.simple_scheduler.Job;
+import org.allesoft.simple_scheduler.scheduler.model.Job;
 import org.allesoft.simple_scheduler.Penalty;
 import org.allesoft.simple_scheduler.Snapshot;
-import org.allesoft.simple_scheduler.Worker;
+import org.allesoft.simple_scheduler.scheduler.model.Worker;
 
 import java.util.Arrays;
 import java.util.Collection;

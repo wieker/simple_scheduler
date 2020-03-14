@@ -1,8 +1,8 @@
 package org.allesoft.simple_scheduler.scheduler;
 
-import org.allesoft.simple_scheduler.Job;
+import org.allesoft.simple_scheduler.scheduler.model.Job;
 import org.allesoft.simple_scheduler.OptionCalculationCache;
-import org.allesoft.simple_scheduler.Worker;
+import org.allesoft.simple_scheduler.scheduler.model.Worker;
 import org.allesoft.simple_scheduler.scheduler.structure.OptionImpl;
 
 import java.util.HashMap;

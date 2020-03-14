@@ -1,6 +1,6 @@
 package org.allesoft.simple_scheduler.scheduler;
 
-import org.allesoft.simple_scheduler.GeoPoint;
+import org.allesoft.simple_scheduler.scheduler.model.GeoPoint;
 
 import java.util.Date;
 

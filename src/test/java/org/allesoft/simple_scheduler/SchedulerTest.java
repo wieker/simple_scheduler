@@ -1,5 +1,8 @@
 package org.allesoft.simple_scheduler;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+
 import org.allesoft.simple_scheduler.scheduler.Prefetcher;
 import org.allesoft.simple_scheduler.scheduler.Scheduler;
 import org.allesoft.simple_scheduler.scheduler.SchedulerImpl;
@@ -34,6 +37,8 @@ public class SchedulerTest {
     @Test
     public void checkAllocation() {
         scheduler.run();
+
+        verify(algorithmService).allocateMatrix(any());
     }
 
 }

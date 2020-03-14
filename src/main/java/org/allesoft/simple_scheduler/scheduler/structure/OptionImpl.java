@@ -1,8 +1,8 @@
 package org.allesoft.simple_scheduler.scheduler.structure;
 
-import org.allesoft.simple_scheduler.Job;
+import org.allesoft.simple_scheduler.scheduler.model.Job;
 import org.allesoft.simple_scheduler.scheduler.service.RoutingService;
-import org.allesoft.simple_scheduler.Worker;
+import org.allesoft.simple_scheduler.scheduler.model.Worker;
 import org.allesoft.simple_scheduler.scheduler.Option;
 
 public class OptionImpl implements Option {
