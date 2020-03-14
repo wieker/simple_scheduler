@@ -41,13 +41,13 @@ public class SchedulerImpl implements Scheduler {
 
     @Override
     public void run() {
-        Collection<Job> jobs = snapshot.getJobs();
-        Collection<Worker> drivers = snapshot.getDrivers();
+        List<Job> jobs = Collections.unmodifiableList(new ArrayList<>(snapshot.getJobs()));
+        List<Worker> drivers = Collections.unmodifiableList(new ArrayList<>(snapshot.getDrivers()));
         prepareOptions(jobs, drivers);
         calculateAllocation(jobs, drivers);
     }
 
-    private void calculateAllocation(Collection<Job> jobs, Collection<Worker> drivers) {
+    private void calculateAllocation(List<Job> jobs, List<Worker> drivers) {
         double[][] matrix = new double[jobs.size()][drivers.size()];
         int i = 0;
         int j = 0;
@@ -59,6 +59,14 @@ public class SchedulerImpl implements Scheduler {
             i ++;
         }
         int[] allocation = algorithmService.allocateMatrix(matrix);
+        int jobIndex = 0;
+        for (int driverIndex : allocation) {
+            Worker assignedWorker = drivers.get(driverIndex);
+            Job job = jobs.get(jobIndex);
+            job.setAssignedWorker(assignedWorker);
+            assignedWorker.setAssignedJob(job);
+            jobIndex ++;
+        }
     }
 
     private void prepareOptions(Collection<Job> jobs, Collection<Worker> drivers) {
