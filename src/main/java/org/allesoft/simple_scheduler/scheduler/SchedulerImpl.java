@@ -6,7 +6,9 @@ import java.util.*;
 
 public class SchedulerImpl implements Scheduler {
     AlgorithmService algorithmService;
-    RoutingService routingService;
+    RoutingService simplestRoutingService;
+    RoutingService lowCostRoutingService;
+    RoutingService finalRoutingService;
     TaskExecutorService taskExecutorService;
     OptionCalculationCache optionCalculationCache;
     Snapshot snapshot;
@@ -18,14 +20,17 @@ public class SchedulerImpl implements Scheduler {
     }
 
     public SchedulerImpl(AlgorithmService algorithmService,
-                         RoutingService routingService,
+                         RoutingService finalRoutingService,
                          TaskExecutorService taskExecutorService,
-                         OptionCalculationCache optionCalculationCache, Prefetcher prefetcher) {
+                         OptionCalculationCache optionCalculationCache, Prefetcher prefetcher,
+                         RoutingService simplestRoutingService, RoutingService lowCostRoutingService) {
         this.algorithmService = algorithmService;
-        this.routingService = routingService;
+        this.finalRoutingService = finalRoutingService;
         this.taskExecutorService = taskExecutorService;
         this.optionCalculationCache = optionCalculationCache;
         this.prefetcher = prefetcher;
+        this.simplestRoutingService = simplestRoutingService;
+        this.lowCostRoutingService = lowCostRoutingService;
     }
 
     @Override
@@ -56,8 +61,8 @@ public class SchedulerImpl implements Scheduler {
                 drivers.stream()
                         .map(driver -> optionCalculationCache.getOption(job, driver))
                         .forEach(options::add));
-        prefetcher.prefetch(routingService, options);
-        taskExecutorService.execute(routingService, options);
+        prefetcher.prefetch(finalRoutingService, options);
+        taskExecutorService.execute(finalRoutingService, options);
     }
 
 }
