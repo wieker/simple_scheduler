@@ -5,6 +5,8 @@ import org.allesoft.simple_scheduler.scheduler.service.RoutingService;
 import org.allesoft.simple_scheduler.scheduler.model.Worker;
 import org.allesoft.simple_scheduler.scheduler.Option;
 
+import java.util.Date;
+
 public class OptionImpl implements Option {
     private final Job job;
     private final Worker driver;
@@ -18,7 +20,7 @@ public class OptionImpl implements Option {
 
     @Override
     public double calculate(RoutingService routingService) {
-        return result = routingService.getRoute(job, driver, ).distance() * 1.0f;
+        return result = routingService.getRoute(job, driver, new Date()).distance() * 1.0f;
     }
 
     @Override

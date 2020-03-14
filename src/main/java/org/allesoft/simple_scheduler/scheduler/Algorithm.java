@@ -14,6 +14,9 @@ public class Algorithm implements AlgorithmService {
         decrement_columns(matrix);
         int num_rows = 0;
 
+        if (matrix.length == 0) {
+            return new int[] {};
+        }
         do {
             num_rows = 0;
             int[] assigned_row = new int[matrix.length];
@@ -136,6 +139,9 @@ public class Algorithm implements AlgorithmService {
     }
 
     private void decrement_columns(double[][] matrix) {
+        if (matrix.length == 0) {
+            return;
+        }
         for (int i = 0; i < matrix[0].length; i ++) {
             double min = matrix[0][i];
             for (double[] doubles : matrix) {

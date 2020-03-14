@@ -29,7 +29,7 @@ public class CaffeineApp {
 
     private static Route getCalculatedRoute(Route route) {
         return getRoute(route.from(), route.to(), Math.sqrt(
-                    sqr(route.from().lat() - route.to().lat()) + sqr(route.from().lon() - route.to().lon())), 0);
+                    sqr(route.from().getLat() - route.to().getLat()) + sqr(route.from().getLon() - route.to().getLon())), 0);
     }
 
     private static Route getRoute(final GeoPoint from, final GeoPoint to, final double distance, final int time) {
@@ -64,12 +64,12 @@ public class CaffeineApp {
     private static GeoPoint getGeoPoint(double lat, double lon) {
         return new GeoPoint() {
             @Override
-            public double lat() {
+            public double getLat() {
                 return lat;
             }
 
             @Override
-            public double lon() {
+            public double getLon() {
                 return lon;
             }
 
@@ -81,7 +81,7 @@ public class CaffeineApp {
             @Override
             public boolean equals(Object obj) {
                 if (obj instanceof GeoPoint) {
-                    return lat() == ((GeoPoint) obj).lon() && lon() == ((GeoPoint) obj).lon();
+                    return getLat() == ((GeoPoint) obj).getLon() && getLon() == ((GeoPoint) obj).getLon();
                 } else {
                     return false;
                 }

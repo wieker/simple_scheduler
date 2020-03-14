@@ -17,7 +17,7 @@ public class CalculatedByCrowFlightRoute implements Route {
     @Override
     public double distance() {
         return Math.sqrt(
-                SchedUtils.sqr(from.lat() - to.lat()) + SchedUtils.sqr(from.lon() - to.lon()));
+                SchedUtils.sqr(from.getLat() - to.getLat()) + SchedUtils.sqr(from.getLon() - to.getLon()));
     }
 
     @Override
