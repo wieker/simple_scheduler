@@ -1,7 +1,9 @@
 package org.allesoft.simple_scheduler.scheduler;
 
-import org.allesoft.simple_scheduler.RoutingService;
+import org.allesoft.simple_scheduler.scheduler.service.RoutingService;
 import org.allesoft.simple_scheduler.scheduler.core.SimplePrefetcher;
+import org.allesoft.simple_scheduler.scheduler.service.DbSnapshotProvider;
+import org.allesoft.simple_scheduler.scheduler.service.SnapshotProvider;
 import org.allesoft.simple_scheduler.scheduler.tools.SingleThreadExecutionService;
 
 public class SchedulerMain {

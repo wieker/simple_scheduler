@@ -1,4 +1,4 @@
-package org.allesoft.simple_scheduler.scheduler;
+package org.allesoft.simple_scheduler.scheduler.service;
 
 import org.allesoft.simple_scheduler.Snapshot;
 

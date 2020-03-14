@@ -1,6 +1,7 @@
 package org.allesoft.simple_scheduler;
 
 import org.allesoft.simple_scheduler.scheduler.Scheduler;
+import org.allesoft.simple_scheduler.scheduler.service.RoutingService;
 import org.junit.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

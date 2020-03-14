@@ -1,7 +1,7 @@
 package org.allesoft.simple_scheduler.scheduler.structure;
 
 import org.allesoft.simple_scheduler.Job;
-import org.allesoft.simple_scheduler.RoutingService;
+import org.allesoft.simple_scheduler.scheduler.service.RoutingService;
 import org.allesoft.simple_scheduler.Worker;
 import org.allesoft.simple_scheduler.scheduler.Option;
 

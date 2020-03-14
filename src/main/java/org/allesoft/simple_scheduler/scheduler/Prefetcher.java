@@ -1,6 +1,6 @@
 package org.allesoft.simple_scheduler.scheduler;
 
-import org.allesoft.simple_scheduler.RoutingService;
+import org.allesoft.simple_scheduler.scheduler.service.RoutingService;
 
 import java.util.Collection;
 

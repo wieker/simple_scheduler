@@ -1,6 +1,6 @@
 package org.allesoft.simple_scheduler.scheduler.tools;
 
-import org.allesoft.simple_scheduler.RoutingService;
+import org.allesoft.simple_scheduler.scheduler.service.RoutingService;
 import org.allesoft.simple_scheduler.TaskExecutorService;
 import org.allesoft.simple_scheduler.scheduler.Option;
 
