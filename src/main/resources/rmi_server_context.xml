@@ -1,0 +1,18 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+
+<beans xmlns = "http://www.springframework.org/schema/beans"
+       xmlns:xsi = "http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation = "http://www.springframework.org/schema/beans
+   http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+    <bean id = "rmiService" class = "org.allesoft.simple_scheduler.rmi.RMIServiceImpl">
+    </bean>
+
+    <bean class="org.springframework.remoting.rmi.RmiServiceExporter">
+        <property name="serviceName" value="RMIService"/>
+        <property name="service" ref="rmiService"/>
+        <property name="serviceInterface" value="org.allesoft.simple_scheduler.rmi.RMIService"/>
+        <property name="registryPort" value="1099"/>
+    </bean>
+
+</beans>
