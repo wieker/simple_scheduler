@@ -2,7 +2,7 @@ package org.allesoft.simple_scheduler;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
-import org.allesoft.simple_scheduler.scheduler.Route;
+import org.allesoft.simple_scheduler.scheduler.structure.Route;
 import org.allesoft.simple_scheduler.scheduler.model.GeoPoint;
 
 import java.util.Date;

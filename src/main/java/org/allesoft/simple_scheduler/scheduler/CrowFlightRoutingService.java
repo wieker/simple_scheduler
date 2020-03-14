@@ -1,6 +1,7 @@
 package org.allesoft.simple_scheduler.scheduler;
 
 import org.allesoft.simple_scheduler.scheduler.model.GeoPoint;
+import org.allesoft.simple_scheduler.scheduler.structure.Route;
 
 import java.util.Date;
 
