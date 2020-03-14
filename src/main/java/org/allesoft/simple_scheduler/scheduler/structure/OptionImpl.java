@@ -18,7 +18,7 @@ public class OptionImpl implements Option {
 
     @Override
     public double calculate(RoutingService routingService) {
-        return result = routingService.getRoute(job, driver).distance() * 1.0f;
+        return result = routingService.getRoute(job, driver, ).distance() * 1.0f;
     }
 
     @Override

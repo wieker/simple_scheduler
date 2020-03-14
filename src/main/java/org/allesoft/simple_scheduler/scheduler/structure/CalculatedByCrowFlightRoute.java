@@ -1,15 +1,15 @@
-package org.allesoft.simple_scheduler.scheduler;
+package org.allesoft.simple_scheduler.scheduler.structure;
 
+import org.allesoft.simple_scheduler.scheduler.SchedUtils;
 import org.allesoft.simple_scheduler.scheduler.model.GeoPoint;
-import org.allesoft.simple_scheduler.scheduler.structure.Route;
 
 import java.util.Date;
 
-class CrowFlightRoutingService implements Route {
+public class CalculatedByCrowFlightRoute implements Route {
     private final GeoPoint from;
     private final GeoPoint to;
 
-    public CrowFlightRoutingService(GeoPoint from, GeoPoint to) {
+    public CalculatedByCrowFlightRoute(GeoPoint from, GeoPoint to) {
         this.from = from;
         this.to = to;
     }
