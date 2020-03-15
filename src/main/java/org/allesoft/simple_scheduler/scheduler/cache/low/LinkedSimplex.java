@@ -40,40 +40,40 @@ public class LinkedSimplex {
     void insert(MultiPoint point) {
         ArrayList<LinkedSimplex> path = new ArrayList<>();
         search(point, 0,
-                (currentSimplex, lowerSimplex) -> createUpperLevelSimplex(point, currentSimplex, lowerSimplex),
-                currentSimplex -> createNewSimplex(point, currentSimplex));
+                (currentSimplex, lowerSimplex) -> splitUpperLevelSimplex(point, currentSimplex, lowerSimplex),
+                currentSimplex -> split(point, currentSimplex));
     }
 
-    private LinkedSimplex createUpperLevelSimplex(MultiPoint point, LinkedSimplex topSimplex, LinkedSimplex newSimplex) {
+    private LinkedSimplex splitUpperLevelSimplex(MultiPoint point, LinkedSimplex topSimplex, LinkedSimplex newSimplex) {
         if (newSimplex != null && new Random().nextBoolean()) {
-            return createNewSimplex(point, topSimplex, newSimplex);
+            return split(point, topSimplex, newSimplex);
         }
         return null;
     }
 
-    private static LinkedSimplex createNewSimplex(MultiPoint point, LinkedSimplex currentSimplexForLayer) {
-        return createNewSimplex(point, currentSimplexForLayer, null);
+    private static LinkedSimplex split(MultiPoint point, LinkedSimplex simplex) {
+        return split(point, simplex, null);
     }
 
-    private static LinkedSimplex createNewSimplex(MultiPoint point, LinkedSimplex currentSimplexForLayer, LinkedSimplex next) {
+    private static LinkedSimplex split(MultiPoint point, LinkedSimplex simplex, LinkedSimplex next) {
         LinkedSimplex linkedSimplex;
         linkedSimplex = new LinkedSimplex();
         linkedSimplex.value = point;
-        MultiPoint median = median(point, currentSimplexForLayer.value);
-        if (point.getPos() < currentSimplexForLayer.value.getPos()) {
-            linkedSimplex.neighbours.add(currentSimplexForLayer.neighbours.get(0));
-            linkedSimplex.neighbours.add(currentSimplexForLayer);
-            linkedSimplex.boundaries.add(currentSimplexForLayer.boundaries.get(0));
+        MultiPoint median = median(point, simplex.value);
+        if (point.getPos() < simplex.value.getPos()) {
+            linkedSimplex.neighbours.add(simplex.neighbours.get(0));
+            linkedSimplex.neighbours.add(simplex);
+            linkedSimplex.boundaries.add(simplex.boundaries.get(0));
             linkedSimplex.boundaries.add(median);
-            currentSimplexForLayer.boundaries.set(0, median);
-            currentSimplexForLayer.neighbours.set(0, linkedSimplex);
+            simplex.boundaries.set(0, median);
+            simplex.neighbours.set(0, linkedSimplex);
         } else {
-            linkedSimplex.neighbours.add(currentSimplexForLayer);
-            linkedSimplex.neighbours.add(currentSimplexForLayer.neighbours.get(1));
+            linkedSimplex.neighbours.add(simplex);
+            linkedSimplex.neighbours.add(simplex.neighbours.get(1));
             linkedSimplex.boundaries.add(median);
-            linkedSimplex.boundaries.add(currentSimplexForLayer.boundaries.get(1));
-            currentSimplexForLayer.boundaries.set(1, median);
-            currentSimplexForLayer.neighbours.set(1, linkedSimplex);
+            linkedSimplex.boundaries.add(simplex.boundaries.get(1));
+            simplex.boundaries.set(1, median);
+            simplex.neighbours.set(1, linkedSimplex);
         }
         linkedSimplex.nextLayer = next;
         return linkedSimplex;
