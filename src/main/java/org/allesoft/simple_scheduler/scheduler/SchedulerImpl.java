@@ -41,8 +41,8 @@ public class SchedulerImpl implements Scheduler {
 
     @Override
     public void run() {
-        List<Job> jobs = Collections.unmodifiableList(new ArrayList<>(snapshot.getJobs()));
-        List<Worker> drivers = Collections.unmodifiableList(new ArrayList<>(snapshot.getDrivers()));
+        List<Job> jobs = List.copyOf(snapshot.getJobs());
+        List<Worker> drivers = List.copyOf(snapshot.getDrivers());
         prepareOptions(jobs, drivers);
         calculateAllocation(jobs, drivers);
     }
