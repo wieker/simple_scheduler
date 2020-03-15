@@ -39,16 +39,16 @@ public class LinkedSimplex {
 
     void insert(MultiPoint point) {
         ArrayList<LinkedSimplex> path = new ArrayList<>();
-        search(point, 0, createUpperLayerSimplexProducer(point), linkedSimplex -> createNewSimplex(point, linkedSimplex));
+        search(point, 0,
+                (currentSimplex, lowerSimplex) -> createUpperLevelSimplex(point, currentSimplex, lowerSimplex),
+                currentSimplex -> createNewSimplex(point, currentSimplex));
     }
 
-    private BiFunction<LinkedSimplex, LinkedSimplex, LinkedSimplex> createUpperLayerSimplexProducer(MultiPoint point) {
-        return (topSimplex, newSimplex) -> {
-            if (newSimplex != null && new Random().nextBoolean()) {
-                return createNewSimplex(point, topSimplex, newSimplex);
-            }
-            return null;
-        };
+    private LinkedSimplex createUpperLevelSimplex(MultiPoint point, LinkedSimplex topSimplex, LinkedSimplex newSimplex) {
+        if (newSimplex != null && new Random().nextBoolean()) {
+            return createNewSimplex(point, topSimplex, newSimplex);
+        }
+        return null;
     }
 
     private static LinkedSimplex createNewSimplex(MultiPoint point, LinkedSimplex currentSimplexForLayer) {
