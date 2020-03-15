@@ -3,6 +3,7 @@ package org.allesoft.simple_scheduler.scheduler.cache.low;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.allesoft.simple_scheduler.scheduler.SchedUtils.sqr;
 
@@ -23,8 +24,26 @@ public class SingleThreadSingleLayerNode {
     }
 
     SingleThreadSingleLayerNode search(Set<SingleThreadSingleLayerNode> passed, SingleThreadSingleLayerNode find) {
+        passed.add(this);
+        double curDist = distance(find, this);
+        // have to select by angle and compare by distance
+        List<Double> neiDist = neighbours.stream().map(nei -> distance(nei, find)).collect(Collectors.toList());
+        int i = 0;
+        for (Double dist : neiDist) {
+            if (dist < curDist) {
+                return neighbours.get(i).search(passed, find);
+            }
+            i++;
+        }
+        if (goDown() == null) {
+
+        }
         neighbours.sort((node, t1) -> compareByDistanceAndAngle(node, t1, find));
         return neighbours.stream().filter(passed::contains).findFirst().orElse(null);
+    }
+
+    SingleThreadSingleLayerNode goDown() {
+        return null;
     }
 
     boolean inSimplex() {
