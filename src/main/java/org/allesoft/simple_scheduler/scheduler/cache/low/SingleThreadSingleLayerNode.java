@@ -26,6 +26,13 @@ public class SingleThreadSingleLayerNode {
     SingleThreadSingleLayerNode search(Set<SingleThreadSingleLayerNode> passed, SingleThreadSingleLayerNode find) {
         passed.add(this);
         double curDist = distance(find, this);
+        if (inSimplex(new MultiPoint())) {
+            if (emptySimplex()) {
+                acquire();
+            } else {
+                splitSimplex();
+            }
+        }
         // have to select by angle and compare by distance
         List<Double> neiDist = neighbours.stream().map(nei -> distance(nei, find)).collect(Collectors.toList());
         int i = 0;
@@ -42,11 +49,27 @@ public class SingleThreadSingleLayerNode {
         return neighbours.stream().filter(passed::contains).findFirst().orElse(null);
     }
 
+    void findSimplex() {
+
+    }
+
+    boolean emptySimplex() {
+        return false;
+    }
+
+    void splitSimplex() {
+
+    }
+
+    void acquire() {
+
+    }
+
     SingleThreadSingleLayerNode goDown() {
         return null;
     }
 
-    boolean inSimplex() {
+    boolean inSimplex(MultiPoint multiPoint) {
         return false;
     }
 
