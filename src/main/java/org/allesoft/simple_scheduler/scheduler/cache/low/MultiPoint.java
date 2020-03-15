@@ -1,7 +1,7 @@
 package org.allesoft.simple_scheduler.scheduler.cache.low;
 
 public class MultiPoint {
-    public int pos;
+    final private int pos;
 
     public MultiPoint(int pos) {
         this.pos = pos;
@@ -9,9 +9,5 @@ public class MultiPoint {
 
     public int getPos() {
         return pos;
-    }
-
-    public void setPos(int pos) {
-        this.pos = pos;
     }
 }

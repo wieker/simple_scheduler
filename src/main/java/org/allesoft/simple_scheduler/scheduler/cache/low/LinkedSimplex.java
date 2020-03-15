@@ -51,19 +51,20 @@ public class LinkedSimplex {
             linkedSimplex = new LinkedSimplex();
             linkedSimplex.value = point;
             LinkedSimplex currentSimplexForLayer = path.get(i);
+            MultiPoint median = median(point, currentSimplexForLayer.value);
             if (point.getPos() < currentSimplexForLayer.value.getPos()) {
                 linkedSimplex.neighbours.add(currentSimplexForLayer.neighbours.get(0));
                 linkedSimplex.neighbours.add(currentSimplexForLayer);
-                linkedSimplex.boundaries.add(new MultiPoint(currentSimplexForLayer.boundaries.get(0).getPos()));
-                linkedSimplex.boundaries.add(new MultiPoint(point.getPos() + 1));
-                currentSimplexForLayer.boundaries.get(0).setPos(point.getPos() + 1);
+                linkedSimplex.boundaries.add(currentSimplexForLayer.boundaries.get(0));
+                linkedSimplex.boundaries.add(median);
+                currentSimplexForLayer.boundaries.set(0, median);
                 currentSimplexForLayer.neighbours.set(0, linkedSimplex);
             } else {
                 linkedSimplex.neighbours.add(currentSimplexForLayer);
                 linkedSimplex.neighbours.add(currentSimplexForLayer.neighbours.get(1));
-                linkedSimplex.boundaries.add(point);
-                linkedSimplex.boundaries.add(new MultiPoint(currentSimplexForLayer.boundaries.get(1).getPos()));
-                currentSimplexForLayer.boundaries.get(1).setPos(point.getPos());
+                linkedSimplex.boundaries.add(median);
+                linkedSimplex.boundaries.add(currentSimplexForLayer.boundaries.get(1));
+                currentSimplexForLayer.boundaries.set(1, median);
                 currentSimplexForLayer.neighbours.set(1, linkedSimplex);
             }
             layers.set(l, linkedSimplex);
@@ -77,6 +78,10 @@ public class LinkedSimplex {
         for (LinkedSimplex la : layers) {
             la.layers = layers;
         }
+    }
+
+    static MultiPoint median(MultiPoint a, MultiPoint b) {
+        return new MultiPoint(Math.max(a.getPos(), b.getPos()));
     }
 
     boolean inSimplex(MultiPoint point) {
@@ -95,28 +100,38 @@ public class LinkedSimplex {
             forLayer.layers = forLayers;
         }
         LinkedSimplex linkedSimplex = forLayers.get(0);
+        print(linkedSimplex);
         linkedSimplex.insert(new MultiPoint(20));
+        print(linkedSimplex);
         linkedSimplex.insert(new MultiPoint(28));
+        print(linkedSimplex);
         linkedSimplex.insert(new MultiPoint(24));
+        print(linkedSimplex);
         linkedSimplex.insert(new MultiPoint(9));
+        print(linkedSimplex);
         linkedSimplex.insert(new MultiPoint(2));
+        print(linkedSimplex);
         linkedSimplex.insert(new MultiPoint(22));
+        print(linkedSimplex);
         linkedSimplex.insert(new MultiPoint(48));
-
-        linkedSimplex = linkedSimplex.search(new MultiPoint(1), 0, new ArrayList<>());
+        print(linkedSimplex);
 
         print(linkedSimplex);
-        print(linkedSimplex.layers.get(2));
-        print(linkedSimplex.layers.get(1));
-        print(linkedSimplex.layers.get(0));
+        print(linkedSimplex, 1);
+        print(linkedSimplex, 2);
     }
 
     private static void print(LinkedSimplex linkedSimplex) {
+        print(linkedSimplex, 0);
+    }
+
+    private static void print(LinkedSimplex linkedSimplex, int layer) {
+        linkedSimplex = linkedSimplex.search(new MultiPoint(1), layer, new ArrayList<>());
         while (true) {
             if (linkedSimplex == null) {
                 break;
             }
-            System.out.print(linkedSimplex.value.getPos() + " ");
+            System.out.print(linkedSimplex);
             if (linkedSimplex.neighbours.size() < 2) {
                 break;
             }
@@ -137,5 +152,10 @@ public class LinkedSimplex {
         linkedSimplex.neighbours.add(null);
         linkedSimplex.neighbours.add(null);
         return linkedSimplex;
+    }
+
+    @Override
+    public String toString() {
+        return " [ " + boundaries.get(0).getPos() + " " + value.getPos() + " " + boundaries.get(1).getPos() + " ] ";
     }
 }
