@@ -2,10 +2,11 @@ package org.allesoft.simple_scheduler.scheduler.cache.low;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class LinkedSimplex {
     static final int DIMENSIONS = 1;
-    static final int LAYERS = 1;
+    static final int LAYERS = 3;
     List<LinkedSimplex> neighbours = new ArrayList<>(DIMENSIONS + 1);
     List<LinkedSimplex> layers = new ArrayList<>(LAYERS);
     List<MultiPoint> boundaries = new ArrayList<>(DIMENSIONS + 1);
@@ -36,10 +37,14 @@ public class LinkedSimplex {
     }
 
     static void doInsert(MultiPoint point, List<LinkedSimplex> path) {
+        System.out.println("Insert: " + point.getPos());
         if (point.getPos() == path.get(0).value.getPos()) {
             return;
         }
         List<LinkedSimplex> layers = new ArrayList<>(LAYERS);
+        for (int i = 0; i < LAYERS; i ++) {
+            layers.add(new LinkedSimplex());
+        }
         int l = LAYERS - 1;
         for (int i = path.size() - 1; i >= 0; i --) {
             LinkedSimplex linkedSimplex;
@@ -61,7 +66,13 @@ public class LinkedSimplex {
                 currentSimplexForLayer.boundaries.get(1).setPos(point.getPos());
                 currentSimplexForLayer.neighbours.set(1, linkedSimplex);
             }
-            layers.add(l, linkedSimplex);
+            layers.set(l, linkedSimplex);
+            int nextInt = new Random().nextInt(2);
+            System.out.println("layer: " + l + " final: " + nextInt);
+            if (nextInt > 0) {
+                break;
+            }
+            l --;
         }
         for (LinkedSimplex la : layers) {
             la.layers = layers;
@@ -77,12 +88,13 @@ public class LinkedSimplex {
     }
 
     public static void main(String[] args) {
-        LinkedSimplex linkedSimplex = new LinkedSimplex();
-        linkedSimplex.value = new MultiPoint(10);
-        linkedSimplex.boundaries.add(0, new MultiPoint(0));
-        linkedSimplex.boundaries.add(1, new MultiPoint(100));
-        linkedSimplex.neighbours.add(null);
-        linkedSimplex.neighbours.add(null);
+        List<LinkedSimplex> forLayers = new ArrayList<>(LAYERS);
+        for (int i = 0; i < LAYERS; i ++) {
+            LinkedSimplex forLayer = createForLayer();
+            forLayers.add(forLayer);
+            forLayer.layers = forLayers;
+        }
+        LinkedSimplex linkedSimplex = forLayers.get(0);
         linkedSimplex.insert(new MultiPoint(20));
         linkedSimplex.insert(new MultiPoint(28));
         linkedSimplex.insert(new MultiPoint(24));
@@ -93,14 +105,37 @@ public class LinkedSimplex {
 
         linkedSimplex = linkedSimplex.search(new MultiPoint(1), 0, new ArrayList<>());
 
+        print(linkedSimplex);
+        print(linkedSimplex.layers.get(2));
+        print(linkedSimplex.layers.get(1));
+        print(linkedSimplex.layers.get(0));
+    }
+
+    private static void print(LinkedSimplex linkedSimplex) {
         while (true) {
-            LinkedSimplex nextSimplex = linkedSimplex.neighbours.get(1);
+            if (linkedSimplex == null) {
+                break;
+            }
             System.out.print(linkedSimplex.value.getPos() + " ");
+            if (linkedSimplex.neighbours.size() < 2) {
+                break;
+            }
+            LinkedSimplex nextSimplex = linkedSimplex.neighbours.get(1);
             if (nextSimplex == null) {
                 break;
             }
             linkedSimplex = nextSimplex;
         }
         System.out.println();
+    }
+
+    private static LinkedSimplex createForLayer() {
+        LinkedSimplex linkedSimplex = new LinkedSimplex();
+        linkedSimplex.value = new MultiPoint(10);
+        linkedSimplex.boundaries.add(0, new MultiPoint(0));
+        linkedSimplex.boundaries.add(1, new MultiPoint(100));
+        linkedSimplex.neighbours.add(null);
+        linkedSimplex.neighbours.add(null);
+        return linkedSimplex;
     }
 }
