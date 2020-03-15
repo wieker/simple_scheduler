@@ -3,28 +3,34 @@ package org.allesoft.simple_scheduler.scheduler.cache.low;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 public class LinkedSimplex {
     static final int DIMENSIONS = 1;
     static final int LAYERS = 3;
     List<LinkedSimplex> neighbours = new ArrayList<>(DIMENSIONS + 1);
-    List<LinkedSimplex> layers = new ArrayList<>(LAYERS);
+    LinkedSimplex nextLayer = null;
     List<MultiPoint> boundaries = new ArrayList<>(DIMENSIONS + 1);
     MultiPoint value;
 
-    LinkedSimplex search(MultiPoint point, int layer, List<LinkedSimplex> path) {
+    LinkedSimplex search(MultiPoint point, int layer) {
+        return search(point, layer, (x, y) -> y, x -> x);
+    }
+
+    LinkedSimplex search(MultiPoint point, int layer,
+                         BiFunction<LinkedSimplex, LinkedSimplex, LinkedSimplex> processor,
+                         Function<LinkedSimplex, LinkedSimplex> finalProcesor) {
         if (inSimplex(point)) {
             if (layer < LAYERS - 1) {
-                path.add(this);
-                return layers.get(layer + 1).search(point, layer + 1, path);
+                return processor.apply(this, nextLayer.search(point, layer + 1, processor, finalProcesor));
             } else {
-                path.add(this);
-                return this;
+                return finalProcesor.apply(this);
             }
         } else {
             LinkedSimplex linkedSimplex = bestNeighbour(point);
             if (linkedSimplex != null) {
-                return linkedSimplex.search(point, layer, path);
+                return linkedSimplex.search(point, layer, processor, finalProcesor);
             } else {
                 return null;
             }
@@ -33,51 +39,44 @@ public class LinkedSimplex {
 
     void insert(MultiPoint point) {
         ArrayList<LinkedSimplex> path = new ArrayList<>();
-        search(point, 0, path).doInsert(point, path);
+        search(point, 0, createUpperLayerSimplexProducer(point), linkedSimplex -> createNewSimplex(point, linkedSimplex));
     }
 
-    static void doInsert(MultiPoint point, List<LinkedSimplex> path) {
-        System.out.println("Insert: " + point.getPos());
-        if (point.getPos() == path.get(0).value.getPos()) {
-            return;
-        }
-        List<LinkedSimplex> layers = new ArrayList<>(LAYERS);
-        for (int i = 0; i < LAYERS; i ++) {
-            layers.add(new LinkedSimplex());
-        }
-        int l = LAYERS - 1;
-        for (int i = path.size() - 1; i >= 0; i --) {
-            LinkedSimplex linkedSimplex;
-            linkedSimplex = new LinkedSimplex();
-            linkedSimplex.value = point;
-            LinkedSimplex currentSimplexForLayer = path.get(i);
-            MultiPoint median = median(point, currentSimplexForLayer.value);
-            if (point.getPos() < currentSimplexForLayer.value.getPos()) {
-                linkedSimplex.neighbours.add(currentSimplexForLayer.neighbours.get(0));
-                linkedSimplex.neighbours.add(currentSimplexForLayer);
-                linkedSimplex.boundaries.add(currentSimplexForLayer.boundaries.get(0));
-                linkedSimplex.boundaries.add(median);
-                currentSimplexForLayer.boundaries.set(0, median);
-                currentSimplexForLayer.neighbours.set(0, linkedSimplex);
-            } else {
-                linkedSimplex.neighbours.add(currentSimplexForLayer);
-                linkedSimplex.neighbours.add(currentSimplexForLayer.neighbours.get(1));
-                linkedSimplex.boundaries.add(median);
-                linkedSimplex.boundaries.add(currentSimplexForLayer.boundaries.get(1));
-                currentSimplexForLayer.boundaries.set(1, median);
-                currentSimplexForLayer.neighbours.set(1, linkedSimplex);
+    private BiFunction<LinkedSimplex, LinkedSimplex, LinkedSimplex> createUpperLayerSimplexProducer(MultiPoint point) {
+        return (topSimplex, newSimplex) -> {
+            if (newSimplex != null && new Random().nextBoolean()) {
+                return createNewSimplex(point, topSimplex, newSimplex);
             }
-            layers.set(l, linkedSimplex);
-            int nextInt = new Random().nextInt(2);
-            System.out.println("layer: " + l + " final: " + nextInt);
-            if (nextInt > 0) {
-                break;
-            }
-            l --;
+            return null;
+        };
+    }
+
+    private static LinkedSimplex createNewSimplex(MultiPoint point, LinkedSimplex currentSimplexForLayer) {
+        return createNewSimplex(point, currentSimplexForLayer, null);
+    }
+
+    private static LinkedSimplex createNewSimplex(MultiPoint point, LinkedSimplex currentSimplexForLayer, LinkedSimplex next) {
+        LinkedSimplex linkedSimplex;
+        linkedSimplex = new LinkedSimplex();
+        linkedSimplex.value = point;
+        MultiPoint median = median(point, currentSimplexForLayer.value);
+        if (point.getPos() < currentSimplexForLayer.value.getPos()) {
+            linkedSimplex.neighbours.add(currentSimplexForLayer.neighbours.get(0));
+            linkedSimplex.neighbours.add(currentSimplexForLayer);
+            linkedSimplex.boundaries.add(currentSimplexForLayer.boundaries.get(0));
+            linkedSimplex.boundaries.add(median);
+            currentSimplexForLayer.boundaries.set(0, median);
+            currentSimplexForLayer.neighbours.set(0, linkedSimplex);
+        } else {
+            linkedSimplex.neighbours.add(currentSimplexForLayer);
+            linkedSimplex.neighbours.add(currentSimplexForLayer.neighbours.get(1));
+            linkedSimplex.boundaries.add(median);
+            linkedSimplex.boundaries.add(currentSimplexForLayer.boundaries.get(1));
+            currentSimplexForLayer.boundaries.set(1, median);
+            currentSimplexForLayer.neighbours.set(1, linkedSimplex);
         }
-        for (LinkedSimplex la : layers) {
-            la.layers = layers;
-        }
+        linkedSimplex.nextLayer = next;
+        return linkedSimplex;
     }
 
     static MultiPoint median(MultiPoint a, MultiPoint b) {
@@ -93,28 +92,15 @@ public class LinkedSimplex {
     }
 
     public static void main(String[] args) {
-        List<LinkedSimplex> forLayers = new ArrayList<>(LAYERS);
-        for (int i = 0; i < LAYERS; i ++) {
-            LinkedSimplex forLayer = createForLayer();
-            forLayers.add(forLayer);
-            forLayer.layers = forLayers;
-        }
-        LinkedSimplex linkedSimplex = forLayers.get(0);
-        print(linkedSimplex);
+        LinkedSimplex linkedSimplex = createForLayer(0);
+
         linkedSimplex.insert(new MultiPoint(20));
-        print(linkedSimplex);
         linkedSimplex.insert(new MultiPoint(28));
-        print(linkedSimplex);
         linkedSimplex.insert(new MultiPoint(24));
-        print(linkedSimplex);
         linkedSimplex.insert(new MultiPoint(9));
-        print(linkedSimplex);
         linkedSimplex.insert(new MultiPoint(2));
-        print(linkedSimplex);
         linkedSimplex.insert(new MultiPoint(22));
-        print(linkedSimplex);
         linkedSimplex.insert(new MultiPoint(48));
-        print(linkedSimplex);
 
         print(linkedSimplex);
         print(linkedSimplex, 1);
@@ -126,7 +112,7 @@ public class LinkedSimplex {
     }
 
     private static void print(LinkedSimplex linkedSimplex, int layer) {
-        linkedSimplex = linkedSimplex.search(new MultiPoint(1), layer, new ArrayList<>());
+        linkedSimplex = linkedSimplex.search(new MultiPoint(1), layer);
         while (true) {
             if (linkedSimplex == null) {
                 break;
@@ -144,13 +130,17 @@ public class LinkedSimplex {
         System.out.println();
     }
 
-    private static LinkedSimplex createForLayer() {
+    private static LinkedSimplex createForLayer(int layer) {
+        if (layer == LAYERS) {
+            return null;
+        }
         LinkedSimplex linkedSimplex = new LinkedSimplex();
         linkedSimplex.value = new MultiPoint(10);
         linkedSimplex.boundaries.add(0, new MultiPoint(0));
         linkedSimplex.boundaries.add(1, new MultiPoint(100));
         linkedSimplex.neighbours.add(null);
         linkedSimplex.neighbours.add(null);
+        linkedSimplex.nextLayer = createForLayer(layer + 1);
         return linkedSimplex;
     }
 
