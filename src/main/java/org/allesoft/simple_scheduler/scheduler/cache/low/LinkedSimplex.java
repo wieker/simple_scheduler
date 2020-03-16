@@ -30,6 +30,11 @@ public abstract class LinkedSimplex {
     }
 
     public LinkedSimplex split(MultiPoint point, LinkedSimplex next) {
+        // 1. neighbours
+        // 2. border
+        // 3. value
+        // 4. nei border - read only
+        // 5. nei neighs - replace only
 
         System.out.println("insert " + point + " into " + value);
         if (getValue() == null) {
