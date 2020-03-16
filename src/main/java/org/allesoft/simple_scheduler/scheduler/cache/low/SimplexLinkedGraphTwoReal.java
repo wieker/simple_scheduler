@@ -106,7 +106,7 @@ public class SimplexLinkedGraphTwoReal extends LinkedSimplex {
     protected MultiPoint median(MultiPoint aPoint, MultiPoint bPoint) {
         MultiPointImplTwo a = (MultiPointImplTwo) aPoint;
         MultiPointImplTwo b = (MultiPointImplTwo) bPoint;
-        return new MultiPointImplTwo((a.getX() + b.getX()) / 2, (a.getY() + b.getX()) / 2);
+        return MultiPointImplTwo.cmp((a.getX() + b.getX()) / 2, (a.getY() + b.getX()) / 2);
     }
 
     @Override
@@ -124,16 +124,16 @@ public class SimplexLinkedGraphTwoReal extends LinkedSimplex {
 
         for (int i = 1; i < 100; i ++) {
             for (int j = 1; j < 100 - i; j ++) {
-                linkedSimplex.insert(new MultiPointImplTwo(i, j));
+                linkedSimplex.insert(MultiPointImplTwo.cmp(i, j));
             }
         }
 
         System.out.println("level 0");
-        print(linkedSimplex.search(new MultiPointImplTwo(1, 1), 0), new HashSet<>());
+        print(linkedSimplex.search(MultiPointImplTwo.cmp(1, 1), 0), new HashSet<>());
         System.out.println("level 1");
-        print(linkedSimplex.search(new MultiPointImplTwo(1, 1), 1), new HashSet<>());
+        print(linkedSimplex.search(MultiPointImplTwo.cmp(1, 1), 1), new HashSet<>());
         System.out.println("level 2");
-        print(linkedSimplex.search(new MultiPointImplTwo(1, 1), 2), new HashSet<>());
+        print(linkedSimplex.search(MultiPointImplTwo.cmp(1, 1), 2), new HashSet<>());
     }
 
     private static void print(LinkedSimplex linkedSimplex, Set<LinkedSimplex> e) {
@@ -151,8 +151,8 @@ public class SimplexLinkedGraphTwoReal extends LinkedSimplex {
             return null;
         }
         LinkedSimplex linkedSimplex = new SimplexLinkedGraphTwoReal(new ArrayList<>(), null, new ArrayList<>(), null);
-        linkedSimplex.setValue(new MultiPointImplTwo(30, 30));
-        linkedSimplex.setBoundaries(List.of(new MultiPointImplTwo(0, 100), new MultiPointImplTwo(0, 0), new MultiPointImplTwo(100, 0)));
+        linkedSimplex.setValue(MultiPointImplTwo.cmp(30, 30));
+        linkedSimplex.setBoundaries(List.of(MultiPointImplTwo.cmp(0, 100), MultiPointImplTwo.cmp(0, 0), MultiPointImplTwo.cmp(100, 0)));
         linkedSimplex.setNextLayer(createForLayer(layer + 1));
         return linkedSimplex;
     }

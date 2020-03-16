@@ -4,9 +4,13 @@ public class MultiPointImplTwo extends MultiPoint {
     final private double x;
     final private double y;
 
-    public MultiPointImplTwo(double x, double y) {
+    private MultiPointImplTwo(double x, double y) {
         this.x = x;
         this.y = y;
+    }
+
+    public static MultiPointImplTwo cmp(double x, double y) {
+        return new MultiPointImplTwo(x, y);
     }
 
     public double getX() {

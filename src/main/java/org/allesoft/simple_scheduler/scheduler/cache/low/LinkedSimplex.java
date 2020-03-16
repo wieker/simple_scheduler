@@ -29,7 +29,7 @@ public abstract class LinkedSimplex {
         this.value = value;
     }
 
-    private LinkedSimplex split(MultiPoint point, LinkedSimplex next) {
+    public LinkedSimplex split(MultiPoint point, LinkedSimplex next) {
 
         System.out.println("insert " + point + " into " + value);
         if (getValue() == null) {
