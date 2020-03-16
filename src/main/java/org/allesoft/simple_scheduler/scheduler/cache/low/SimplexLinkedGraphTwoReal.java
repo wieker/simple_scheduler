@@ -70,6 +70,9 @@ public class SimplexLinkedGraphTwoReal extends LinkedSimplex {
     @Override
     protected Optional<LinkedSimplex> bestNeighbour(MultiPoint gPoint) {
         MultiPointImplTwo point = (MultiPointImplTwo) gPoint;
+        if (getBoundaries().size() < 3) {
+            throw new RuntimeException("wrong boundary");
+        }
         Iterator<MultiPoint> iterator = getBoundaries().iterator();
         MultiPointImplTwo a = (MultiPointImplTwo) iterator.next();
         MultiPointImplTwo b = ((MultiPointImplTwo)iterator.next());
@@ -140,9 +143,7 @@ public class SimplexLinkedGraphTwoReal extends LinkedSimplex {
         }
         LinkedSimplex linkedSimplex = new SimplexLinkedGraphTwoReal(new ArrayList<>(), null, new ArrayList<>(), null);
         linkedSimplex.setValue(new MultiPointImplTwo(30, 30));
-        linkedSimplex.getBoundaries().add(new MultiPointImplTwo(0, 100));
-        linkedSimplex.getBoundaries().add(new MultiPointImplTwo(0, 0));
-        linkedSimplex.getBoundaries().add(new MultiPointImplTwo(100, 0));
+        linkedSimplex.setBoundaries(List.of(new MultiPointImplTwo(0, 100), new MultiPointImplTwo(0, 0), new MultiPointImplTwo(100, 0)));
         linkedSimplex.setNextLayer(createForLayer(layer + 1));
         return linkedSimplex;
     }

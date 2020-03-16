@@ -2,7 +2,10 @@ package org.allesoft.simple_scheduler.scheduler.cache.low;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
@@ -22,7 +25,7 @@ public abstract class LinkedSimplex {
     public LinkedSimplex(Collection<LinkedSimplex> neighbours, LinkedSimplex nextLayer, Collection<MultiPoint> boundaries, MultiPoint value) {
         this.neighbours = neighbours;
         this.nextLayer = nextLayer;
-        this.boundaries = boundaries;
+        this.boundaries = Collections.unmodifiableCollection(boundaries);
         this.value = value;
     }
 
@@ -48,11 +51,14 @@ public abstract class LinkedSimplex {
         oldBorder.forEach(vertex -> {
             border.remove(vertex);
             Optional<LinkedSimplex> nearestNeigh = neighbourForThisHyperWall(border);
-            nearestNeigh.ifPresent(n -> n.getNeighbours().remove(this));
+            System.out.println(border.stream().map(Objects::toString).collect(Collectors.joining()));
+            System.out.println(nearestNeigh.orElse(null));
             oldNeighs.add(nearestNeigh);
             border.add(vertex);
         });
         int i = 0;
+        Map<LinkedSimplex, LinkedSimplex> mapping = new HashMap<>();
+        boolean used = false;
         for (MultiPoint vertex : oldBorder) {
             border.remove(vertex);
             Optional<LinkedSimplex> nearestNei = oldNeighs.get(i);
@@ -61,24 +67,27 @@ public abstract class LinkedSimplex {
             System.out.println(nearestNei.orElse(null));
 
             LinkedSimplex temporarySimplex = newInstance(border);
-            LinkedSimplex newSimplex = temporarySimplex.inSimplex(getValue()) ? this : temporarySimplex;
+            LinkedSimplex newSimplex = temporarySimplex.inSimplex(getValue()) && !used ? this : temporarySimplex;
+            used = true;
             newSimplex.setBoundaries(new ArrayList<>(border));
-            List<LinkedSimplex> newNeis = new ArrayList<>(DIMENSIONS + 1);
-            nearestNei.ifPresent(newNeis::add);
-            newSimplex.setNeighbours(newNeis);
+            nearestNei.ifPresent(nei -> mapping.put(newSimplex, nei));
             newSimplexes.add(newSimplex);
-
-            nearestNei.ifPresent(n -> n.getNeighbours().add(newSimplex));
 
             border.remove(median);
             border.add(vertex);
 
             i++;
         }
+        mapping.forEach((linkedSimplex, linkedSimplex2) -> System.out.println(linkedSimplex.toString() + " => " + linkedSimplex2));
         newSimplexes.forEach(s -> {
             ArrayList<LinkedSimplex> collection = new ArrayList<>(newSimplexes);
             collection.remove(s);
-            s.getNeighbours().addAll(collection);
+            LinkedSimplex oldNei = mapping.get(s);
+            if (oldNei != null) {
+                collection.add(oldNei);
+                oldNei.replaceNeighbour(this, s);
+            }
+            s.setNeighbours(collection);
         });
         AtomicReference<LinkedSimplex> withValue = new AtomicReference<>();
         newSimplexes.forEach(s -> {
@@ -133,7 +142,12 @@ public abstract class LinkedSimplex {
     }
 
     public void setNeighbours(Collection<LinkedSimplex> neighbours) {
-        this.neighbours = neighbours;
+        this.neighbours = neighbours != null ? Collections.unmodifiableCollection(neighbours) : null;
+    }
+
+    public void replaceNeighbour(LinkedSimplex old, LinkedSimplex newSimplex) {
+        neighbours.remove(old);
+        neighbours.add(newSimplex);
     }
 
     public LinkedSimplex getNextLayer() {
@@ -149,7 +163,7 @@ public abstract class LinkedSimplex {
     }
 
     public void setBoundaries(Collection<MultiPoint> boundaries) {
-        this.boundaries = boundaries;
+        this.boundaries = Collections.unmodifiableCollection(boundaries);
     }
 
     public MultiPoint getValue() {
@@ -161,7 +175,7 @@ public abstract class LinkedSimplex {
     }
 
     protected Optional<LinkedSimplex> neighbourForThisHyperWall(List<MultiPoint> border) {
-        return this.neighbours.stream()
+        return this.getNeighbours().stream()
                         .filter(nei -> nei.getBoundaries().containsAll(border))
                         .findFirst();
     }
