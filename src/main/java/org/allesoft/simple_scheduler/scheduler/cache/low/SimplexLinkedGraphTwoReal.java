@@ -64,7 +64,12 @@ public class SimplexLinkedGraphTwoReal extends LinkedSimplex {
     }
 
     public int isLeft(MultiPointImplTwo a, MultiPointImplTwo b, MultiPointImplTwo c){
-        return ((b.getX() - a.getX())*(c.getY() - a.getY()) - (b.getY() - a.getY())*(c.getX() - a.getX()));
+        try {
+            return ((b.getX() - a.getX()) * (c.getY() - a.getY()) - (b.getY() - a.getY()) * (c.getX() - a.getX()));
+        } catch (NullPointerException e) {
+            System.out.println(c);
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -78,6 +83,10 @@ public class SimplexLinkedGraphTwoReal extends LinkedSimplex {
         MultiPointImplTwo b = ((MultiPointImplTwo)iterator.next());
         MultiPointImplTwo c = ((MultiPointImplTwo)iterator.next());
         MultiPointImplTwo value = getValue();
+        if (value == null) {
+            value = (MultiPointImplTwo) median(a, b);
+            value = (MultiPointImplTwo) median(value, c);
+        }
         boolean leftAB = isLeft(a, b, point) * isLeft(a, b, value) < 0;
         boolean leftBC = isLeft(c, b, point) * isLeft(c, b, value) < 0;
         boolean leftCA = isLeft(a, c, point) * isLeft(a, c, value) < 0;

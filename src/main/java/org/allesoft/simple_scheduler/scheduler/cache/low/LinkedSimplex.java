@@ -118,7 +118,7 @@ public abstract class LinkedSimplex {
             return bestNeighbour(point).map(s -> s.search(point, layer, processor, finalProcesor))
                     .orElseThrow(() -> {
                         System.out.println(getNeighbours().stream().map(Objects::toString).collect(Collectors.joining()));
-                        return new RuntimeException("now neighbour for " + this + " and " + point);
+                        return new RuntimeException("no neighbour for " + this + " and " + point);
                     });
         }
     }
@@ -138,11 +138,11 @@ public abstract class LinkedSimplex {
     protected abstract Optional<LinkedSimplex> bestNeighbour(MultiPoint point);
 
     public Collection<LinkedSimplex> getNeighbours() {
-        return neighbours;
+        return Collections.unmodifiableCollection(neighbours);
     }
 
     public void setNeighbours(Collection<LinkedSimplex> neighbours) {
-        this.neighbours = neighbours != null ? Collections.unmodifiableCollection(neighbours) : null;
+        this.neighbours = neighbours;
     }
 
     public void replaceNeighbour(LinkedSimplex old, LinkedSimplex newSimplex) {
