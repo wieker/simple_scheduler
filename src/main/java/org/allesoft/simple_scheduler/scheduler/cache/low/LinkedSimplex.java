@@ -1,17 +1,25 @@
 package org.allesoft.simple_scheduler.scheduler.cache.low;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Optional;
 import java.util.Random;
+import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+
+import static java.lang.Integer.max;
+import static java.lang.Integer.min;
 
 public class LinkedSimplex {
     static final int DIMENSIONS = 1;
     static final int LAYERS = 3;
-    List<LinkedSimplex> neighbours = new ArrayList<>(DIMENSIONS + 1);
+    Collection<LinkedSimplex> neighbours = new ArrayList<>(DIMENSIONS + 1);
     LinkedSimplex nextLayer = null;
-    List<MultiPoint> boundaries = new ArrayList<>(DIMENSIONS + 1);
+    Collection<MultiPoint> boundaries = new ArrayList<>(DIMENSIONS + 1);
     MultiPoint value;
 
     LinkedSimplex search(MultiPoint point, int layer) {
@@ -28,17 +36,11 @@ public class LinkedSimplex {
                 return finalProcesor.apply(this);
             }
         } else {
-            LinkedSimplex linkedSimplex = bestNeighbour(point);
-            if (linkedSimplex != null) {
-                return linkedSimplex.search(point, layer, processor, finalProcesor);
-            } else {
-                return null;
-            }
+            return bestNeighbour(point).map(s -> s.search(point, layer, processor, finalProcesor)).orElse(null);
         }
     }
 
     void insert(MultiPoint point) {
-        ArrayList<LinkedSimplex> path = new ArrayList<>();
         search(point, 0,
                 (currentSimplex, lowerSimplex) -> splitUpperLevelSimplex(point, currentSimplex, lowerSimplex),
                 currentSimplex -> split(point, currentSimplex));
@@ -56,25 +58,27 @@ public class LinkedSimplex {
     }
 
     private static LinkedSimplex split(MultiPoint point, LinkedSimplex simplex, LinkedSimplex next) {
-        LinkedSimplex linkedSimplex;
-        linkedSimplex = new LinkedSimplex();
+        LinkedSimplex linkedSimplex = new LinkedSimplex();
         linkedSimplex.value = point;
+
         MultiPoint median = median(point, simplex.value);
-        if (point.getPos() < simplex.value.getPos()) {
-            linkedSimplex.neighbours.add(simplex.neighbours.get(0));
-            linkedSimplex.neighbours.add(simplex);
-            linkedSimplex.boundaries.add(simplex.boundaries.get(0));
-            linkedSimplex.boundaries.add(median);
-            simplex.boundaries.set(0, median);
-            simplex.neighbours.set(0, linkedSimplex);
-        } else {
-            linkedSimplex.neighbours.add(simplex);
-            linkedSimplex.neighbours.add(simplex.neighbours.get(1));
-            linkedSimplex.boundaries.add(median);
-            linkedSimplex.boundaries.add(simplex.boundaries.get(1));
-            simplex.boundaries.set(1, median);
-            simplex.neighbours.set(1, linkedSimplex);
-        }
+        Optional<LinkedSimplex> movedNeighbour = simplex.bestNeighbour(point);
+        Optional<MultiPoint> movedBoundary = simplex.bestBoundary(point);
+
+        movedNeighbour.ifPresent(n -> {
+                    linkedSimplex.neighbours.add(n);
+                    simplex.neighbours.remove(n);
+                });
+        movedBoundary.ifPresent(b -> {
+            linkedSimplex.boundaries.add(b);
+            simplex.boundaries.remove(b);
+        });
+        linkedSimplex.neighbours.add(simplex);
+        linkedSimplex.boundaries.add(median);
+
+        simplex.boundaries.add(median);
+        simplex.neighbours.add(linkedSimplex);
+
         linkedSimplex.nextLayer = next;
         return linkedSimplex;
     }
@@ -84,11 +88,20 @@ public class LinkedSimplex {
     }
 
     boolean inSimplex(MultiPoint point) {
-        return point.getPos() >= boundaries.get(0).getPos() && point.getPos() < boundaries.get(1).getPos();
+        Iterator<MultiPoint> iterator = boundaries.iterator();
+        int a = iterator.next().getPos();
+        int b = iterator.next().getPos();
+        return point.getPos() >= min(a, b) && point.getPos() < max(a, b);
     }
 
-    LinkedSimplex bestNeighbour(MultiPoint point) {
-        return point.getPos() < boundaries.get(0).getPos() ? neighbours.get(0) : neighbours.get(1);
+    Optional<LinkedSimplex> bestNeighbour(MultiPoint point) {
+        return point.getPos() < value.getPos() ?
+                neighbours.stream().filter(n -> n.value.getPos() < value.getPos()).min(Comparator.comparingInt(n -> n.value.getPos())) :
+                neighbours.stream().filter(n -> n.value.getPos() > value.getPos()).max(Comparator.comparingInt(n -> n.value.getPos()));
+    }
+
+    Optional<MultiPoint> bestBoundary(MultiPoint point) {
+        return point.getPos() < value.getPos() ? boundaries.stream().min(Comparator.comparingInt(n -> n.getPos())) : boundaries.stream().max(Comparator.comparingInt(n -> n.getPos()));
     }
 
     public static void main(String[] args) {
@@ -102,32 +115,19 @@ public class LinkedSimplex {
         linkedSimplex.insert(new MultiPoint(22));
         linkedSimplex.insert(new MultiPoint(48));
 
-        print(linkedSimplex);
-        print(linkedSimplex, 1);
-        print(linkedSimplex, 2);
+        print(linkedSimplex.search(new MultiPoint(1), 0), new HashSet<>());
+        print(linkedSimplex.search(new MultiPoint(1), 1), new HashSet<>());
+        print(linkedSimplex.search(new MultiPoint(1), 2), new HashSet<>());
     }
 
-    private static void print(LinkedSimplex linkedSimplex) {
-        print(linkedSimplex, 0);
-    }
-
-    private static void print(LinkedSimplex linkedSimplex, int layer) {
-        linkedSimplex = linkedSimplex.search(new MultiPoint(1), layer);
-        while (true) {
-            if (linkedSimplex == null) {
-                break;
+    private static void print(LinkedSimplex linkedSimplex, Set<LinkedSimplex> e) {
+        System.out.println(linkedSimplex);
+        e.add(linkedSimplex);
+        for (LinkedSimplex simplex : linkedSimplex.neighbours) {
+            if (!e.contains(simplex)) {
+                print(simplex, e);
             }
-            System.out.print(linkedSimplex);
-            if (linkedSimplex.neighbours.size() < 2) {
-                break;
-            }
-            LinkedSimplex nextSimplex = linkedSimplex.neighbours.get(1);
-            if (nextSimplex == null) {
-                break;
-            }
-            linkedSimplex = nextSimplex;
         }
-        System.out.println();
     }
 
     private static LinkedSimplex createForLayer(int layer) {
@@ -136,16 +136,14 @@ public class LinkedSimplex {
         }
         LinkedSimplex linkedSimplex = new LinkedSimplex();
         linkedSimplex.value = new MultiPoint(10);
-        linkedSimplex.boundaries.add(0, new MultiPoint(0));
-        linkedSimplex.boundaries.add(1, new MultiPoint(100));
-        linkedSimplex.neighbours.add(null);
-        linkedSimplex.neighbours.add(null);
+        linkedSimplex.boundaries.add(new MultiPoint(0));
+        linkedSimplex.boundaries.add(new MultiPoint(100));
         linkedSimplex.nextLayer = createForLayer(layer + 1);
         return linkedSimplex;
     }
 
     @Override
     public String toString() {
-        return " [ " + boundaries.get(0).getPos() + " " + value.getPos() + " " + boundaries.get(1).getPos() + " ] ";
+        return " [ " + boundaries.stream().map(MultiPoint::getPos).min(Integer::compare).orElseThrow() + " " + value.getPos() + " " + boundaries.stream().map(MultiPoint::getPos).max(Integer::compare).orElseThrow() + " ] ";
     }
 }
