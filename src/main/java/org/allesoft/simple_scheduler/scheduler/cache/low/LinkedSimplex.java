@@ -3,14 +3,16 @@ package org.allesoft.simple_scheduler.scheduler.cache.low;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public abstract class LinkedSimplex {
-    static final int DIMENSIONS = 1;
+    static final int DIMENSIONS = 2;
     static final int LAYERS = 3;
     private Collection<LinkedSimplex> neighbours = new ArrayList<>(DIMENSIONS + 1);
     private LinkedSimplex nextLayer = null;
@@ -25,9 +27,18 @@ public abstract class LinkedSimplex {
     }
 
     private LinkedSimplex split(MultiPoint point, LinkedSimplex next) {
-        MultiPoint median = median(point, value);
 
         System.out.println("insert " + point + " into " + value);
+        if (getValue() == null) {
+            setValue(point);
+            return null; //or it's better to return this?
+        }
+
+        if (getValue().equals(point)) {
+            return null;
+        }
+
+        MultiPoint median = median(point, value);
 
         Collection<LinkedSimplex> newSimplexes = new ArrayList<>(DIMENSIONS + 1);
 
@@ -46,6 +57,8 @@ public abstract class LinkedSimplex {
             border.remove(vertex);
             Optional<LinkedSimplex> nearestNei = oldNeighs.get(i);
             border.add(median);
+            System.out.println(border.stream().map(Objects::toString).collect(Collectors.joining()));
+            System.out.println(nearestNei.orElse(null));
 
             LinkedSimplex temporarySimplex = newInstance(border);
             LinkedSimplex newSimplex = temporarySimplex.inSimplex(getValue()) ? this : temporarySimplex;
@@ -93,7 +106,11 @@ public abstract class LinkedSimplex {
                 return finalProcesor.apply(this);
             }
         } else {
-            return bestNeighbour(point).map(s -> s.search(point, layer, processor, finalProcesor)).orElse(null);
+            return bestNeighbour(point).map(s -> s.search(point, layer, processor, finalProcesor))
+                    .orElseThrow(() -> {
+                        System.out.println(getNeighbours().stream().map(Objects::toString).collect(Collectors.joining()));
+                        return new RuntimeException("now neighbour for " + this + " and " + point);
+                    });
         }
     }
 
@@ -145,7 +162,7 @@ public abstract class LinkedSimplex {
 
     protected Optional<LinkedSimplex> neighbourForThisHyperWall(List<MultiPoint> border) {
         return this.neighbours.stream()
-                        .filter(nei -> nei.boundaries.containsAll(border))
+                        .filter(nei -> nei.getBoundaries().containsAll(border))
                         .findFirst();
     }
 
