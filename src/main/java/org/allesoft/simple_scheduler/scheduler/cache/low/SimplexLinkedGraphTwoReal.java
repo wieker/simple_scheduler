@@ -124,7 +124,7 @@ public class SimplexLinkedGraphTwoReal extends LinkedSimplex {
 
         for (int i = 1; i < 100; i ++) {
             for (int j = 1; j < 100 - i; j ++) {
-                linkedSimplex.insert(MultiPointImplTwo.cmp(i, j));
+                linkedSimplex = linkedSimplex.insert(MultiPointImplTwo.cmp(i, j));
             }
         }
 

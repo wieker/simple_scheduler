@@ -24,10 +24,8 @@ public class AlgTest {
         LinkedSimplex onePart = simplex.split(cmp(15, 15), null);
 
         assertNotEquals(simplex, onePart);
-        assertThat(simplex.getNeighbours().size(), is(2));
         assertThat(onePart.getNeighbours().size(), is(2));
         assertFalse(onePart.getNeighbours().contains(onePart));
-        assertFalse(simplex.getNeighbours().contains(simplex));
     }
 
     @Test
