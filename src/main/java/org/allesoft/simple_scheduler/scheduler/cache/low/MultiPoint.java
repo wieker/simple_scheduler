@@ -10,4 +10,14 @@ public class MultiPoint {
     public int getPos() {
         return pos;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        return pos == ((MultiPoint) obj).pos;
+    }
+
+    @Override
+    public String toString() {
+        return " { " + pos + " } ";
+    }
 }
