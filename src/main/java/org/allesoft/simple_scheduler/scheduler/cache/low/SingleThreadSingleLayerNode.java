@@ -26,7 +26,7 @@ public class SingleThreadSingleLayerNode {
     SingleThreadSingleLayerNode search(Set<SingleThreadSingleLayerNode> passed, SingleThreadSingleLayerNode find) {
         passed.add(this);
         double curDist = distance(find, this);
-        if (inSimplex(new MultiPoint(0))) {
+        if (inSimplex(new MultiPointImplOne(0))) {
             if (emptySimplex()) {
                 acquire();
             } else {
