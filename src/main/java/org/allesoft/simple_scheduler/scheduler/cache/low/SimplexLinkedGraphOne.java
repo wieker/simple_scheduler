@@ -12,8 +12,8 @@ import java.util.Set;
 import static java.lang.Integer.max;
 import static java.lang.Integer.min;
 
-public class SimplexLinkedGraphTwo extends LinkedSimplex {
-    public SimplexLinkedGraphTwo(Collection<LinkedSimplex> neighbours, LinkedSimplex nextLayer, Collection<MultiPoint> boundaries, MultiPointImplOne value) {
+public class SimplexLinkedGraphOne extends LinkedSimplex {
+    public SimplexLinkedGraphOne(Collection<LinkedSimplex> neighbours, LinkedSimplex nextLayer, Collection<MultiPoint> boundaries, MultiPointImplOne value) {
         super(neighbours, nextLayer, boundaries, value);
     }
 
@@ -48,7 +48,7 @@ public class SimplexLinkedGraphTwo extends LinkedSimplex {
 
     @Override
     protected LinkedSimplex newInstance(List<MultiPoint> border) {
-        return new SimplexLinkedGraphTwo(null, null, new ArrayList<>(border), null);
+        return new SimplexLinkedGraphOne(null, null, new ArrayList<>(border), null);
     }
 
     @Override
@@ -89,7 +89,7 @@ public class SimplexLinkedGraphTwo extends LinkedSimplex {
         if (layer == LAYERS) {
             return null;
         }
-        LinkedSimplex linkedSimplex = new SimplexLinkedGraphTwo(new ArrayList<>(), null, new ArrayList<>(), null);
+        LinkedSimplex linkedSimplex = new SimplexLinkedGraphOne(new ArrayList<>(), null, new ArrayList<>(), null);
         linkedSimplex.setValue(new MultiPointImplOne(10));
         linkedSimplex.getBoundaries().add(new MultiPointImplOne(0));
         linkedSimplex.getBoundaries().add(new MultiPointImplOne(100));

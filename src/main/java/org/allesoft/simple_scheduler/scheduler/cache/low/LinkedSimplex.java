@@ -143,7 +143,7 @@ public abstract class LinkedSimplex {
         this.value = value;
     }
 
-    private Optional<LinkedSimplex> neighbourForThisHyperWall(List<MultiPoint> border) {
+    protected Optional<LinkedSimplex> neighbourForThisHyperWall(List<MultiPoint> border) {
         return this.neighbours.stream()
                         .filter(nei -> nei.boundaries.containsAll(border))
                         .findFirst();
