@@ -31,58 +31,26 @@ public class LinkedSimplex {
         this.value = value;
     }
 
-    LinkedSimplex search(MultiPoint point, int layer) {
-        return search(point, layer, (x, y) -> y, x -> x);
+    private LinkedSimplex split(MultiPoint point) {
+        return split(point, null);
     }
 
-    LinkedSimplex search(MultiPoint point, int layer,
-                         BiFunction<LinkedSimplex, LinkedSimplex, LinkedSimplex> processor,
-                         Function<LinkedSimplex, LinkedSimplex> finalProcesor) {
-        check2(this, "before check");
-        if (inSimplex(point)) {
-            if (layer < LAYERS - 1) {
-                return processor.apply(this, nextLayer.search(point, layer + 1, processor, finalProcesor));
-            } else {
-                return finalProcesor.apply(this);
-            }
-        } else {
-            return bestNeighbour(point).map(s -> s.search(point, layer, processor, finalProcesor)).orElse(null);
-        }
-    }
+    private LinkedSimplex split(MultiPoint point, LinkedSimplex next) {
+        MultiPoint median = median(point, value);
 
-    void insert(MultiPoint point) {
-        search(point, 0,
-                (currentSimplex, lowerSimplex) -> splitUpperLevelSimplex(point, currentSimplex, lowerSimplex),
-                currentSimplex -> split(point, currentSimplex));
-    }
-
-    private LinkedSimplex splitUpperLevelSimplex(MultiPoint point, LinkedSimplex topSimplex, LinkedSimplex newSimplex) {
-        if (newSimplex != null && new Random().nextBoolean()) {
-            return split(point, topSimplex, newSimplex);
-        }
-        return null;
-    }
-
-    private static LinkedSimplex split(MultiPoint point, LinkedSimplex simplex) {
-        return split(point, simplex, null);
-    }
-
-    private static LinkedSimplex split(MultiPoint point, LinkedSimplex parentSimplex, LinkedSimplex next) {
-        MultiPoint median = median(point, parentSimplex.value);
-
-        System.out.println("insert " + point.getPos() + " into " + parentSimplex.value);
-        check2(parentSimplex, "broken parent");
-        neiCheck(parentSimplex);
+        System.out.println("insert " + point + " into " + value);
+        check2(this, "broken parent");
+        neiCheck(this);
 
         Collection<LinkedSimplex> newSimplexes = new ArrayList<>(DIMENSIONS + 1);
 
-        List<MultiPoint> border = new ArrayList<>(parentSimplex.boundaries);
-        List<MultiPoint> oldBorder = new ArrayList<>(parentSimplex.boundaries);
+        List<MultiPoint> border = new ArrayList<>(boundaries);
+        List<MultiPoint> oldBorder = new ArrayList<>(boundaries);
         List<Optional<LinkedSimplex>> oldNeighs = new ArrayList<>(border.size());
         oldBorder.forEach(vertex -> {
             border.remove(vertex);
-            Optional<LinkedSimplex> nearestNeigh = neighbourForThisHyperWall(parentSimplex, border);
-            nearestNeigh.ifPresent(n -> n.getNeighbours().remove(parentSimplex));
+            Optional<LinkedSimplex> nearestNeigh = neighbourForThisHyperWall(border);
+            nearestNeigh.ifPresent(n -> n.getNeighbours().remove(this));
             oldNeighs.add(nearestNeigh);
             border.add(vertex);
         });
@@ -92,8 +60,8 @@ public class LinkedSimplex {
             Optional<LinkedSimplex> nearestNei = oldNeighs.get(i);
             border.add(median);
 
-            LinkedSimplex temporarySimplex = new LinkedSimplex(null, null, new ArrayList<>(border), null);
-            LinkedSimplex newSimplex = temporarySimplex.inSimplex(parentSimplex.getValue()) ? parentSimplex : temporarySimplex;
+            LinkedSimplex temporarySimplex = newInstance(border);
+            LinkedSimplex newSimplex = temporarySimplex.inSimplex(getValue()) ? this : temporarySimplex;
             newSimplex.setBoundaries(new ArrayList<>(border));
             List<LinkedSimplex> newNeis = new ArrayList<>(DIMENSIONS + 1);
             nearestNei.ifPresent(newNeis::add);
@@ -125,16 +93,39 @@ public class LinkedSimplex {
         return withValue.get();
     }
 
+    LinkedSimplex search(MultiPoint point, int layer) {
+        return search(point, layer, (x, y) -> y, x -> x);
+    }
+
+    LinkedSimplex search(MultiPoint point, int layer,
+                         BiFunction<LinkedSimplex, LinkedSimplex, LinkedSimplex> processor,
+                         Function<LinkedSimplex, LinkedSimplex> finalProcesor) {
+        check2(this, "before check");
+        if (inSimplex(point)) {
+            if (layer < LAYERS - 1) {
+                return processor.apply(this, nextLayer.search(point, layer + 1, processor, finalProcesor));
+            } else {
+                return finalProcesor.apply(this);
+            }
+        } else {
+            return bestNeighbour(point).map(s -> s.search(point, layer, processor, finalProcesor)).orElse(null);
+        }
+    }
+
+    void insert(MultiPoint point) {
+        search(point, 0,
+                (currentSimplex, lowerSimplex) -> currentSimplex.splitUpperLevelSimplex(point, lowerSimplex),
+                currentSimplex -> currentSimplex.split(point, null));
+    }
+
+    private LinkedSimplex newInstance(List<MultiPoint> border) {
+        return new LinkedSimplex(null, null, new ArrayList<>(border), null);
+    }
+
     private static void neiCheck(LinkedSimplex simplex) {
         if (simplex.getNeighbours().size() != 2 - (simplex.getBoundaries().stream().map(MultiPoint::getPos).filter(List.of(0, 100)::contains).count())) {
             throw new RuntimeException("neigh broken");
         }
-    }
-
-    private static Optional<LinkedSimplex> neighbourForThisHyperWall(LinkedSimplex simplex, List<MultiPoint> border) {
-        return simplex.neighbours.stream()
-                        .filter(nei -> nei.boundaries.containsAll(border))
-                        .findFirst();
     }
 
     private static void check2(LinkedSimplex simplex, String s2) {
@@ -147,7 +138,7 @@ public class LinkedSimplex {
         });
     }
 
-    static MultiPoint median(MultiPoint a, MultiPoint b) {
+    MultiPoint median(MultiPoint a, MultiPoint b) {
         return new MultiPoint(Math.max(a.getPos(), b.getPos()));
     }
 
@@ -207,7 +198,7 @@ public class LinkedSimplex {
 
     @Override
     public String toString() {
-        return " [ " + boundaries.stream().map(MultiPoint::getPos).min(Integer::compare).orElseThrow() + " " + ((value != null) ? value.getPos() : -1) + " " + boundaries.stream().map(MultiPoint::getPos).max(Integer::compare).orElseThrow() + " ] ";
+        return " [ " + boundaries.stream().map(MultiPoint::getPos).min(Integer::compare).orElseThrow() + " " + value + " " + boundaries.stream().map(MultiPoint::getPos).max(Integer::compare).orElseThrow() + " ] ";
     }
 
     public Collection<LinkedSimplex> getNeighbours() {
@@ -240,5 +231,18 @@ public class LinkedSimplex {
 
     public void setValue(MultiPoint value) {
         this.value = value;
+    }
+
+    private Optional<LinkedSimplex> neighbourForThisHyperWall(List<MultiPoint> border) {
+        return this.neighbours.stream()
+                        .filter(nei -> nei.boundaries.containsAll(border))
+                        .findFirst();
+    }
+
+    private LinkedSimplex splitUpperLevelSimplex(MultiPoint point, LinkedSimplex newSimplex) {
+        if (newSimplex != null && new Random().nextBoolean()) {
+            return split(point, newSimplex);
+        }
+        return null;
     }
 }
