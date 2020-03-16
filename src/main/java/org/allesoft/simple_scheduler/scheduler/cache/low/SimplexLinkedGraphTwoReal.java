@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class SimplexLinkedGraphTwoReal extends LinkedSimplex {
     public SimplexLinkedGraphTwoReal(Collection<LinkedSimplex> neighbours, LinkedSimplex nextLayer, Collection<MultiPoint> boundaries, MultiPointImplTwo value) {
@@ -103,19 +104,20 @@ public class SimplexLinkedGraphTwoReal extends LinkedSimplex {
 
     @Override
     public String toString() {
-        return " [ " + getBoundaries().stream().map(point -> ((MultiPointImplTwo) point).getX()).min(Integer::compare).orElseThrow() + " " + getValue() + " " + getBoundaries().stream().map(point -> ((MultiPointImplTwo) point).getX()).max(Integer::compare).orElseThrow() + " ] ";
+        return " [ " + getBoundaries().stream().map(Object::toString).collect(Collectors.joining()) + " / " + getValue()  + " ] ";
     }
 
     public static void main(String[] args) {
-        for (int i = 0; i < 100; i ++) {
-            LinkedSimplex linkedSimplex = createForLayer(0);
+        LinkedSimplex linkedSimplex = createForLayer(0);
 
-            linkedSimplex.insert(new MultiPointImplTwo(20, 20));
+        linkedSimplex.insert(new MultiPointImplTwo(20, 20));
 
-            print(linkedSimplex.search(new MultiPointImplTwo(1, 1), 0), new HashSet<>());
-            print(linkedSimplex.search(new MultiPointImplTwo(1, 1), 1), new HashSet<>());
-            print(linkedSimplex.search(new MultiPointImplTwo(1, 1), 2), new HashSet<>());
-        }
+        System.out.println("level 0");
+        print(linkedSimplex.search(new MultiPointImplTwo(1, 1), 0), new HashSet<>());
+        System.out.println("level 1");
+        print(linkedSimplex.search(new MultiPointImplTwo(1, 1), 1), new HashSet<>());
+        System.out.println("level 2");
+        print(linkedSimplex.search(new MultiPointImplTwo(1, 1), 2), new HashSet<>());
     }
 
     private static void print(LinkedSimplex linkedSimplex, Set<LinkedSimplex> e) {
