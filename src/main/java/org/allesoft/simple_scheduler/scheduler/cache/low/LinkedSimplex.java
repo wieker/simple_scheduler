@@ -17,7 +17,7 @@ public abstract class LinkedSimplex {
     private Collection<MultiPoint> boundaries = new ArrayList<>(DIMENSIONS + 1);
     private MultiPoint value;
 
-    public LinkedSimplex(Collection<LinkedSimplex> neighbours, LinkedSimplex nextLayer, Collection<MultiPoint> boundaries, MultiPointImplOne value) {
+    public LinkedSimplex(Collection<LinkedSimplex> neighbours, LinkedSimplex nextLayer, Collection<MultiPoint> boundaries, MultiPoint value) {
         this.neighbours = neighbours;
         this.nextLayer = nextLayer;
         this.boundaries = boundaries;
@@ -79,11 +79,11 @@ public abstract class LinkedSimplex {
         return withValue.get();
     }
 
-    LinkedSimplex search(MultiPointImplOne point, int layer) {
+    LinkedSimplex search(MultiPoint point, int layer) {
         return search(point, layer, (x, y) -> y, x -> x);
     }
 
-    LinkedSimplex search(MultiPointImplOne point, int layer,
+    LinkedSimplex search(MultiPoint point, int layer,
                          BiFunction<LinkedSimplex, LinkedSimplex, LinkedSimplex> processor,
                          Function<LinkedSimplex, LinkedSimplex> finalProcesor) {
         if (inSimplex(point)) {
@@ -97,7 +97,7 @@ public abstract class LinkedSimplex {
         }
     }
 
-    void insert(MultiPointImplOne point) {
+    void insert(MultiPoint point) {
         search(point, 0,
                 (currentSimplex, lowerSimplex) -> currentSimplex.splitUpperLevelSimplex(point, lowerSimplex),
                 currentSimplex -> currentSimplex.split(point, null));
