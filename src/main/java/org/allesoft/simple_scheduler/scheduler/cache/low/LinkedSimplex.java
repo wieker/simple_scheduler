@@ -149,7 +149,11 @@ public abstract class LinkedSimplex {
     }
 
     public void replaceNeighbour(LinkedSimplex old, LinkedSimplex newSimplex) {
+        int size = neighbours.size();
         neighbours.remove(old);
+        if (size == neighbours.size()) {
+            throw new RuntimeException("miss neighbours " + this + old + newSimplex);
+        }
         neighbours.add(newSimplex);
         if (neighbours.size() > DIMENSIONS + 1) {
             throw new RuntimeException("too many neighbours");

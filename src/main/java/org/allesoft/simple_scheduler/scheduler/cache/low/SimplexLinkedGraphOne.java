@@ -91,8 +91,7 @@ public class SimplexLinkedGraphOne extends LinkedSimplex {
         }
         LinkedSimplex linkedSimplex = new SimplexLinkedGraphOne(new ArrayList<>(), null, new ArrayList<>(), null);
         linkedSimplex.setValue(new MultiPointImplOne(10));
-        linkedSimplex.getBoundaries().add(new MultiPointImplOne(0));
-        linkedSimplex.getBoundaries().add(new MultiPointImplOne(100));
+        linkedSimplex.setBoundaries(List.of(new MultiPointImplOne(0), new MultiPointImplOne(100)));
         linkedSimplex.setNextLayer(createForLayer(layer + 1));
         return linkedSimplex;
     }
