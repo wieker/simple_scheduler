@@ -2,11 +2,9 @@ package org.allesoft.simple_scheduler.scheduler.cache.low;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -17,7 +15,7 @@ public abstract class LinkedSimplex {
     private Collection<LinkedSimplex> neighbours = new ArrayList<>(DIMENSIONS + 1);
     private LinkedSimplex nextLayer = null;
     private Collection<MultiPoint> boundaries = new ArrayList<>(DIMENSIONS + 1);
-    private MultiPointImplOne value;
+    private MultiPoint value;
 
     public LinkedSimplex(Collection<LinkedSimplex> neighbours, LinkedSimplex nextLayer, Collection<MultiPoint> boundaries, MultiPointImplOne value) {
         this.neighbours = neighbours;
@@ -26,11 +24,7 @@ public abstract class LinkedSimplex {
         this.value = value;
     }
 
-    private LinkedSimplex split(MultiPointImplOne point) {
-        return split(point, null);
-    }
-
-    private LinkedSimplex split(MultiPointImplOne point, LinkedSimplex next) {
+    private LinkedSimplex split(MultiPoint point, LinkedSimplex next) {
         MultiPoint median = median(point, value);
 
         System.out.println("insert " + point + " into " + value);
@@ -111,52 +105,11 @@ public abstract class LinkedSimplex {
 
     protected abstract LinkedSimplex newInstance(List<MultiPoint> border);
 
-    protected abstract MultiPoint median(MultiPointImplOne a, MultiPointImplOne b);
+    protected abstract MultiPoint median(MultiPoint a, MultiPoint b);
 
-    protected abstract boolean inSimplex(MultiPointImplOne point);
+    protected abstract boolean inSimplex(MultiPoint point);
 
-    protected abstract Optional<LinkedSimplex> bestNeighbour(MultiPointImplOne point);
-
-    public static void main(String[] args) {
-        for (int i = 0; i < 100; i ++) {
-            LinkedSimplex linkedSimplex = createForLayer(0);
-
-            linkedSimplex.insert(new MultiPointImplOne(20));
-            linkedSimplex.insert(new MultiPointImplOne(28));
-            linkedSimplex.insert(new MultiPointImplOne(24));
-            linkedSimplex.insert(new MultiPointImplOne(9));
-            linkedSimplex.insert(new MultiPointImplOne(2));
-            linkedSimplex.insert(new MultiPointImplOne(22));
-            linkedSimplex.insert(new MultiPointImplOne(48));
-            linkedSimplex.insert(new MultiPointImplOne(49));
-
-            print(linkedSimplex.search(new MultiPointImplOne(1), 0), new HashSet<>());
-            print(linkedSimplex.search(new MultiPointImplOne(1), 1), new HashSet<>());
-            print(linkedSimplex.search(new MultiPointImplOne(1), 2), new HashSet<>());
-        }
-    }
-
-    private static void print(LinkedSimplex linkedSimplex, Set<LinkedSimplex> e) {
-        System.out.println(linkedSimplex);
-        e.add(linkedSimplex);
-        for (LinkedSimplex simplex : linkedSimplex.neighbours) {
-            if (!e.contains(simplex)) {
-                print(simplex, e);
-            }
-        }
-    }
-
-    private static LinkedSimplex createForLayer(int layer) {
-        if (layer == LAYERS) {
-            return null;
-        }
-        LinkedSimplex linkedSimplex = new SimplexLinkedGraphTwo(new ArrayList<>(), null, new ArrayList<>(), null);
-        linkedSimplex.value = new MultiPointImplOne(10);
-        linkedSimplex.boundaries.add(new MultiPointImplOne(0));
-        linkedSimplex.boundaries.add(new MultiPointImplOne(100));
-        linkedSimplex.nextLayer = createForLayer(layer + 1);
-        return linkedSimplex;
-    }
+    protected abstract Optional<LinkedSimplex> bestNeighbour(MultiPoint point);
 
     public Collection<LinkedSimplex> getNeighbours() {
         return neighbours;
@@ -182,11 +135,11 @@ public abstract class LinkedSimplex {
         this.boundaries = boundaries;
     }
 
-    public MultiPointImplOne getValue() {
+    public MultiPoint getValue() {
         return value;
     }
 
-    public void setValue(MultiPointImplOne value) {
+    public void setValue(MultiPoint value) {
         this.value = value;
     }
 
@@ -196,7 +149,7 @@ public abstract class LinkedSimplex {
                         .findFirst();
     }
 
-    private LinkedSimplex splitUpperLevelSimplex(MultiPointImplOne point, LinkedSimplex newSimplex) {
+    private LinkedSimplex splitUpperLevelSimplex(MultiPoint point, LinkedSimplex newSimplex) {
         if (newSimplex != null && new Random().nextBoolean()) {
             return split(point, newSimplex);
         }
