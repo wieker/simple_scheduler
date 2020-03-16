@@ -111,6 +111,7 @@ public class SimplexLinkedGraphTwoReal extends LinkedSimplex {
         LinkedSimplex linkedSimplex = createForLayer(0);
 
         linkedSimplex.insert(new MultiPointImplTwo(20, 20));
+        linkedSimplex.insert(new MultiPointImplTwo(20, 40));
 
         System.out.println("level 0");
         print(linkedSimplex.search(new MultiPointImplTwo(1, 1), 0), new HashSet<>());
