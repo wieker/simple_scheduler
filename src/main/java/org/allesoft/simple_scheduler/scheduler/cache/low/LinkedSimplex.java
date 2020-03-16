@@ -110,16 +110,16 @@ public abstract class LinkedSimplex {
                          Function<LinkedSimplex, LinkedSimplex> finalProcesor) {
         if (inSimplex(point)) {
             if (layer < LAYERS - 1) {
-                return processor.apply(this, nextLayer.search(point, layer + 1, processor, finalProcesor));
+                try {
+                    return processor.apply(this, nextLayer.search(point, layer + 1, processor, finalProcesor));
+                } catch (RuntimeException e) {
+                    throw new RuntimeException(e);
+                }
             } else {
                 return finalProcesor.apply(this);
             }
         } else {
-            return bestNeighbour(point).map(s -> s.search(point, layer, processor, finalProcesor))
-                    .orElseThrow(() -> {
-                        System.out.println(getNeighbours().stream().map(Objects::toString).collect(Collectors.joining()));
-                        return new RuntimeException("no neighbour for " + this + " and " + point);
-                    });
+            return bestNeighbour(point).map(s -> s.search(point, layer, processor, finalProcesor)).orElse(null);
         }
     }
 
@@ -143,11 +143,17 @@ public abstract class LinkedSimplex {
 
     public void setNeighbours(Collection<LinkedSimplex> neighbours) {
         this.neighbours = neighbours;
+        if (neighbours.size() > DIMENSIONS + 1) {
+            throw new RuntimeException("too many neighbours");
+        }
     }
 
     public void replaceNeighbour(LinkedSimplex old, LinkedSimplex newSimplex) {
         neighbours.remove(old);
         neighbours.add(newSimplex);
+        if (neighbours.size() > DIMENSIONS + 1) {
+            throw new RuntimeException("too many neighbours");
+        }
     }
 
     public LinkedSimplex getNextLayer() {

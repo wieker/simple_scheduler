@@ -1,19 +1,19 @@
 package org.allesoft.simple_scheduler.scheduler.cache.low;
 
 public class MultiPointImplTwo extends MultiPoint {
-    final private int x;
-    final private int y;
+    final private double x;
+    final private double y;
 
-    public MultiPointImplTwo(int x, int y) {
+    public MultiPointImplTwo(double x, double y) {
         this.x = x;
         this.y = y;
     }
 
-    public int getX() {
+    public double getX() {
         return x;
     }
 
-    public int getY() {
+    public double getY() {
         return y;
     }
 

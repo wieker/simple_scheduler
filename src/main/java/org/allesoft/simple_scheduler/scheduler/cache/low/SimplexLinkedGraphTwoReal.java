@@ -63,7 +63,7 @@ public class SimplexLinkedGraphTwoReal extends LinkedSimplex {
         return (MultiPointImplTwo) super.getValue();
     }
 
-    public int isLeft(MultiPointImplTwo a, MultiPointImplTwo b, MultiPointImplTwo c){
+    public double isLeft(MultiPointImplTwo a, MultiPointImplTwo b, MultiPointImplTwo c){
         try {
             return ((b.getX() - a.getX()) * (c.getY() - a.getY()) - (b.getY() - a.getY()) * (c.getX() - a.getX()));
         } catch (NullPointerException e) {
