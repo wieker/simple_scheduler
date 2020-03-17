@@ -34,16 +34,7 @@ public abstract class LinkedSimplex {
         // 3. value
         // 4. nei border - read only
         // 5. nei neighs - replace only
-
         System.out.println("insert " + point + " into " + value);
-        if (getValue() == null) {
-            setValue(point);
-            return this; //or it's better to return this?
-        }
-
-        if (getValue().equals(point)) {
-            return this;
-        }
 
         MultiPoint median = median(point, value);
 
@@ -107,7 +98,7 @@ public abstract class LinkedSimplex {
         AtomicBoolean grow = new AtomicBoolean(true);
         return search(point, 0,
                 (currentSimplex, lowerSimplex) -> currentSimplex.splitUpperLevelSimplex(point, lowerSimplex, grow),
-                currentSimplex -> currentSimplex.split(point, null));
+                currentSimplex -> currentSimplex.splitBase(point, null, grow));
     }
 
     protected abstract LinkedSimplex newInstance(List<MultiPoint> border);
@@ -177,5 +168,19 @@ public abstract class LinkedSimplex {
         }
         grow.set(false);
         return this;
+    }
+
+    private LinkedSimplex splitBase(MultiPoint point, LinkedSimplex newSimplex, AtomicBoolean grow) {
+        if (getValue() == null) {
+            setValue(point);
+            grow.set(false);
+            return this; //or it's better to return this?
+        }
+
+        if (getValue().equals(point)) {
+            grow.set(false);
+            return this;
+        }
+        return split(point, newSimplex);
     }
 }
