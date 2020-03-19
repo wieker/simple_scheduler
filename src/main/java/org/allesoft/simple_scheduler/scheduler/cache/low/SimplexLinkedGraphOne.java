@@ -1,6 +1,7 @@
 package org.allesoft.simple_scheduler.scheduler.cache.low;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -53,7 +54,7 @@ public class SimplexLinkedGraphOne extends LinkedSimplex {
 
     @Override
     public String toString() {
-        return " [ " + getBoundaries().stream().map(point -> ((MultiPointImplOne) point).getPos()).min(Integer::compare).orElseThrow() + " " + getValue() + " " + getBoundaries().stream().map(point -> ((MultiPointImplOne) point).getPos()).max(Integer::compare).orElseThrow() + " ] ";
+        return " [ " + getBoundaries().stream().map(point -> ((MultiPointImplOne) point).getPos()).min(Integer::compare).orElseThrow(RuntimeException::new) + " " + getValue() + " " + getBoundaries().stream().map(point -> ((MultiPointImplOne) point).getPos()).max(Integer::compare).orElseThrow(RuntimeException::new) + " ] ";
     }
 
     public static void main(String[] args) {
@@ -91,7 +92,7 @@ public class SimplexLinkedGraphOne extends LinkedSimplex {
         }
         LinkedSimplex linkedSimplex = new SimplexLinkedGraphOne(new ArrayList<>(), null, new ArrayList<>(), null);
         linkedSimplex.setValue(new MultiPointImplOne(10));
-        linkedSimplex.setBoundaries(List.of(new MultiPointImplOne(0), new MultiPointImplOne(100)));
+        linkedSimplex.setBoundaries(Arrays.asList(new MultiPointImplOne(0), new MultiPointImplOne(100)));
         linkedSimplex.setNextLayer(createForLayer(layer + 1));
         return linkedSimplex;
     }

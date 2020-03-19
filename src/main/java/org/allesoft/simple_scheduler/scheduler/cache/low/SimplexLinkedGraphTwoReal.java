@@ -1,7 +1,9 @@
 package org.allesoft.simple_scheduler.scheduler.cache.low;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -91,13 +93,13 @@ public class SimplexLinkedGraphTwoReal extends LinkedSimplex {
         boolean leftBC = isLeft(c, b, point) * isLeft(c, b, value) < 0;
         boolean leftCA = isLeft(a, c, point) * isLeft(a, c, value) < 0;
         if (leftAB) {
-            return neighbourForThisHyperWall(List.of(a, b));
+            return neighbourForThisHyperWall(Arrays.asList(a, b));
         }
         if (leftBC) {
-            return neighbourForThisHyperWall(List.of(c, b));
+            return neighbourForThisHyperWall(Arrays.asList(c, b));
         }
         if (leftCA) {
-            return neighbourForThisHyperWall(List.of(a, c));
+            return neighbourForThisHyperWall(Arrays.asList(a, c));
         }
         return Optional.empty();
     }
@@ -152,7 +154,7 @@ public class SimplexLinkedGraphTwoReal extends LinkedSimplex {
         }
         LinkedSimplex linkedSimplex = new SimplexLinkedGraphTwoReal(new ArrayList<>(), null, new ArrayList<>(), null);
         linkedSimplex.setValue(MultiPointImplTwo.cmp(30, 30));
-        linkedSimplex.setBoundaries(List.of(MultiPointImplTwo.cmp(0, 100), MultiPointImplTwo.cmp(0, 0), MultiPointImplTwo.cmp(100, 0)));
+        linkedSimplex.setBoundaries(Arrays.asList(MultiPointImplTwo.cmp(0, 100), MultiPointImplTwo.cmp(0, 0), MultiPointImplTwo.cmp(100, 0)));
         linkedSimplex.setNextLayer(createForLayer(layer + 1));
         return linkedSimplex;
     }

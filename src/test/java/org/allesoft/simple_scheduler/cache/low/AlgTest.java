@@ -6,6 +6,7 @@ import org.allesoft.simple_scheduler.scheduler.cache.low.SimplexLinkedGraphTwoRe
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.allesoft.simple_scheduler.scheduler.cache.low.MultiPointImplTwo.cmp;
@@ -18,7 +19,7 @@ public class AlgTest {
     @Test
     public void check1() {
         List<LinkedSimplex> neighbours = new ArrayList<>();
-        List<MultiPoint> boundaries = List.of(cmp(0, 0), cmp(50, 100), cmp(100, 0));
+        List<MultiPoint> boundaries = Arrays.asList(cmp(0, 0), cmp(50, 100), cmp(100, 0));
         LinkedSimplex simplex = new SimplexLinkedGraphTwoReal(neighbours, null, boundaries, cmp(30, 30));
 
         LinkedSimplex onePart = simplex.split(cmp(15, 15), null);
@@ -31,7 +32,7 @@ public class AlgTest {
     @Test
     public void check2() {
         List<LinkedSimplex> neighbours = new ArrayList<>();
-        List<MultiPoint> boundaries = List.of(cmp(0, 0), cmp(50, 100), cmp(100, 0));
+        List<MultiPoint> boundaries = Arrays.asList(cmp(0, 0), cmp(50, 100), cmp(100, 0));
         LinkedSimplex simplex = new SimplexLinkedGraphTwoReal(neighbours, null, boundaries, cmp(30, 30));
 
         LinkedSimplex onePart = simplex.split(cmp(15, 15), null);

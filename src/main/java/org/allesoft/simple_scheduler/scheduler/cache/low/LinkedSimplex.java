@@ -15,14 +15,14 @@ import java.util.function.Function;
 
 public abstract class LinkedSimplex {
     static final int DIMENSIONS = 2;
-    static final int LAYERS = 3;
+    static final int LAYERS = 1;
     private Collection<LinkedSimplex> neighbours = new ArrayList<>(DIMENSIONS + 1);
     private LinkedSimplex nextLayer = null;
     private Collection<MultiPoint> boundaries = new ArrayList<>(DIMENSIONS + 1);
     private MultiPoint value;
 
     public LinkedSimplex(Collection<LinkedSimplex> neighbours, LinkedSimplex nextLayer, Collection<MultiPoint> boundaries, MultiPoint value) {
-        this.neighbours = neighbours;
+        this.neighbours = neighbours != null ? Collections.unmodifiableList(new ArrayList<>(neighbours)) : null;
         this.nextLayer = nextLayer;
         this.boundaries = Collections.unmodifiableCollection(boundaries);
         this.value = value;
@@ -35,6 +35,10 @@ public abstract class LinkedSimplex {
         // 4. nei border - read only
         // 5. nei neighs - replace only
         System.out.println("insert " + point + " into " + value);
+        System.out.println(this);
+        for (LinkedSimplex s : getNeighbours()) {
+            System.out.println(s);
+        }
 
         MultiPoint median = median(point, value);
 
@@ -42,12 +46,12 @@ public abstract class LinkedSimplex {
 
         AtomicReference<LinkedSimplex> withValue = new AtomicReference<>();
         List<MultiPoint> border = new ArrayList<>(boundaries);
-        List<MultiPoint> oldBorder = List.copyOf(boundaries);
+        List<MultiPoint> oldBorder = Collections.unmodifiableList(new ArrayList<>(boundaries));
         Map<LinkedSimplex, Optional<LinkedSimplex>> neighs = new HashMap<>();
         oldBorder.forEach(vertex -> {
             border.remove(vertex);
             border.add(median);
-            LinkedSimplex newInstance = newInstance(List.copyOf(border));
+            LinkedSimplex newInstance = newInstance(Collections.unmodifiableList(border));
             if (newInstance.inSimplex(value)) {
                 newInstance.setValue(value);
                 newInstance.setNextLayer(nextLayer);
@@ -114,22 +118,25 @@ public abstract class LinkedSimplex {
     }
 
     public void setNeighbours(Collection<LinkedSimplex> neighbours) {
-        this.neighbours = neighbours;
+        this.neighbours = Collections.unmodifiableList(new ArrayList<>(neighbours));
         if (neighbours.size() > DIMENSIONS + 1) {
             throw new RuntimeException("too many neighbours");
         }
     }
 
     public void replaceNeighbour(LinkedSimplex old, LinkedSimplex newSimplex) {
-        int size = neighbours.size();
-        neighbours.remove(old);
-        if (size == neighbours.size()) {
+        System.out.println("replace " + old + " => " + newSimplex);
+        List<LinkedSimplex> newNeighbours = new ArrayList<>(neighbours);
+        int size = newNeighbours.size();
+        newNeighbours.remove(old);
+        if (size == newNeighbours.size()) {
             throw new RuntimeException("miss neighbours " + this + old + newSimplex);
         }
-        neighbours.add(newSimplex);
-        if (neighbours.size() > DIMENSIONS + 1) {
+        newNeighbours.add(newSimplex);
+        if (newNeighbours.size() > DIMENSIONS + 1) {
             throw new RuntimeException("too many neighbours");
         }
+        setNeighbours(newNeighbours);
     }
 
     public LinkedSimplex getNextLayer() {
