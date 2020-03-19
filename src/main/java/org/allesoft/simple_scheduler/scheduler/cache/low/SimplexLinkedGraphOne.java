@@ -33,7 +33,7 @@ public class SimplexLinkedGraphOne extends LinkedSimplex {
     }
 
     @Override
-    protected Optional<LinkedSimplex> bestNeighbour(MultiPoint gPoint) {
+    protected Optional<LinkedSimplex> bestNeighbour(MultiPoint gPoint, Set<LinkedSimplex> visited) {
         MultiPointImplOne point = (MultiPointImplOne) gPoint;
         return point.getPos() < getValue().getPos() ?
                 getNeighbours().stream().filter(n -> ((MultiPointImplOne) n.getValue()).getPos() < getValue().getPos()).min(Comparator.comparingInt(n -> ((MultiPointImplOne) n.getValue()).getPos())) :

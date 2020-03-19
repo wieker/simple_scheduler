@@ -3,7 +3,6 @@ package org.allesoft.simple_scheduler.scheduler.cache.low;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -75,7 +74,7 @@ public class SimplexLinkedGraphTwoReal extends LinkedSimplex {
     }
 
     @Override
-    protected Optional<LinkedSimplex> bestNeighbour(MultiPoint gPoint) {
+    protected Optional<LinkedSimplex> bestNeighbour(MultiPoint gPoint, Set<LinkedSimplex> visited) {
         MultiPointImplTwo point = (MultiPointImplTwo) gPoint;
         if (getBoundaries().size() < 3) {
             throw new RuntimeException("wrong boundary");
@@ -89,18 +88,31 @@ public class SimplexLinkedGraphTwoReal extends LinkedSimplex {
             value = (MultiPointImplTwo) median(a, b);
             value = (MultiPointImplTwo) median(value, c);
         }
-        boolean leftAB = isLeft(a, b, point) * isLeft(a, b, value) < 0;
-        boolean leftBC = isLeft(c, b, point) * isLeft(c, b, value) < 0;
-        boolean leftCA = isLeft(a, c, point) * isLeft(a, c, value) < 0;
+        boolean leftAB = isLeft(a, b, point) * isLeft(a, b, value) <= 0;
+        boolean leftBC = isLeft(c, b, point) * isLeft(c, b, value) <= 0;
+        boolean leftCA = isLeft(a, c, point) * isLeft(a, c, value) <= 0;
         if (leftAB) {
-            return neighbourForThisHyperWall(Arrays.asList(a, b));
+            Optional<LinkedSimplex> linkedSimplex = neighbourForThisHyperWall(Arrays.asList(a, b));
+            if (!visited.contains(linkedSimplex.orElse(null))) {
+                return linkedSimplex;
+            }
+            System.out.println("cycle");
         }
         if (leftBC) {
-            return neighbourForThisHyperWall(Arrays.asList(c, b));
+            Optional<LinkedSimplex> linkedSimplex = neighbourForThisHyperWall(Arrays.asList(c, b));
+            if (!visited.contains(linkedSimplex.orElse(null))) {
+                return linkedSimplex;
+            }
+            System.out.println("cycle");
         }
         if (leftCA) {
-            return neighbourForThisHyperWall(Arrays.asList(a, c));
+            Optional<LinkedSimplex> linkedSimplex = neighbourForThisHyperWall(Arrays.asList(a, c));
+            if (!visited.contains(linkedSimplex.orElse(null))) {
+                return linkedSimplex;
+            }
+            System.out.println("cycle");
         }
+        System.out.println("this");
         return Optional.empty();
     }
 

@@ -104,17 +104,18 @@ public abstract class LinkedSimplex {
     }
 
     LinkedSimplex search(MultiPoint point, int layer) {
-        return search(point, layer, (x, y) -> y, x -> x);
+        return search(point, layer, (x, y) -> y, x -> x, new HashSet<LinkedSimplex>());
     }
 
     LinkedSimplex search(MultiPoint point, int layer,
                          BiFunction<LinkedSimplex, LinkedSimplex, LinkedSimplex> processor,
-                         Function<LinkedSimplex, LinkedSimplex> finalProcesor) {
+                         Function<LinkedSimplex, LinkedSimplex> finalProcesor, Set<LinkedSimplex> visited) {
         System.out.println("enter " + this);
+        visited.add(this);
         if (inSimplex(point)) {
             if (layer < LAYERS - 1) {
                 try {
-                    return processor.apply(this, nextLayer.search(point, layer + 1, processor, finalProcesor));
+                    return processor.apply(this, nextLayer.search(point, layer + 1, processor, finalProcesor, visited));
                 } catch (RuntimeException e) {
                     throw new RuntimeException(e);
                 }
@@ -122,7 +123,7 @@ public abstract class LinkedSimplex {
                 return finalProcesor.apply(this);
             }
         } else {
-            return bestNeighbour(point).map(s -> s.search(point, layer, processor, finalProcesor)).orElse(null);
+            return bestNeighbour(point, visited).map(s -> s.search(point, layer, processor, finalProcesor, visited)).orElse(null);
         }
     }
 
@@ -131,7 +132,7 @@ public abstract class LinkedSimplex {
         System.out.println("insert enter " + point);
         return search(point, 0,
                 (currentSimplex, lowerSimplex) -> currentSimplex.splitUpperLevelSimplex(point, lowerSimplex, grow),
-                currentSimplex -> currentSimplex.splitBase(point, null, grow));
+                currentSimplex -> currentSimplex.splitBase(point, null, grow), new HashSet<LinkedSimplex>());
     }
 
     protected abstract LinkedSimplex newInstance(List<MultiPoint> border);
@@ -140,7 +141,7 @@ public abstract class LinkedSimplex {
 
     protected abstract boolean inSimplex(MultiPoint point);
 
-    protected abstract Optional<LinkedSimplex> bestNeighbour(MultiPoint point);
+    protected abstract Optional<LinkedSimplex> bestNeighbour(MultiPoint point, Set<LinkedSimplex> visited);
 
     public Collection<LinkedSimplex> getNeighbours() {
         return Collections.unmodifiableCollection(neighbours);
@@ -193,9 +194,15 @@ public abstract class LinkedSimplex {
     }
 
     protected Optional<LinkedSimplex> neighbourForThisHyperWall(List<MultiPoint> border) {
-        return this.getNeighbours().stream()
-                        .filter(nei -> nei.getBoundaries().containsAll(border))
-                        .findFirst();
+        Optional<LinkedSimplex> first = this.getNeighbours().stream()
+                .filter(nei -> nei.getBoundaries().containsAll(border))
+                .findFirst();
+        if (!first.isPresent()) {
+            for (MultiPoint point : border) {
+                System.out.println(point);
+            }
+        }
+        return first;
     }
 
     private LinkedSimplex splitUpperLevelSimplex(MultiPoint point, LinkedSimplex newSimplex, AtomicBoolean grow) {
