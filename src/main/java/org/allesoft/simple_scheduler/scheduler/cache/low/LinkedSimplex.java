@@ -4,10 +4,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
@@ -41,6 +43,7 @@ public abstract class LinkedSimplex {
         }
 
         MultiPoint median = median(point, value);
+        System.out.println(median);
 
         Collection<LinkedSimplex> newSimplexes = new ArrayList<>(DIMENSIONS + 1);
 
@@ -52,10 +55,13 @@ public abstract class LinkedSimplex {
             border.remove(vertex);
             border.add(median);
             LinkedSimplex newInstance = newInstance(Collections.unmodifiableList(border));
+            System.out.println("newInstance: " + newInstance);
             if (newInstance.inSimplex(value)) {
+                System.out.println("old");
                 newInstance.setValue(value);
                 newInstance.setNextLayer(nextLayer);
             } else if (newInstance.inSimplex(point)) {
+                System.out.println("new");
                 newInstance.setValue(point);
                 newInstance.setNextLayer(next);
                 withValue.set(newInstance);
@@ -73,7 +79,28 @@ public abstract class LinkedSimplex {
             s.setNeighbours(newNighs);
         });
 
+        size += 2;
+        int i = withValue.get().deepSearch(0, new HashSet<>());
+        if (i != size) {
+            throw new RuntimeException("deep search fail");
+        }
         return withValue.get();
+    }
+
+    static int size = 1;
+
+    int deepSearch(int d, Set<LinkedSimplex> passed) {
+        d ++;
+        passed.add(this);
+        for (LinkedSimplex simplex : getNeighbours()) {
+            if (!simplex.getNeighbours().contains(this)) {
+                throw new RuntimeException("unconnected");
+            }
+            if (!passed.contains(simplex)) {
+                d = simplex.deepSearch(d, passed);
+            }
+        }
+        return d;
     }
 
     LinkedSimplex search(MultiPoint point, int layer) {
@@ -83,6 +110,7 @@ public abstract class LinkedSimplex {
     LinkedSimplex search(MultiPoint point, int layer,
                          BiFunction<LinkedSimplex, LinkedSimplex, LinkedSimplex> processor,
                          Function<LinkedSimplex, LinkedSimplex> finalProcesor) {
+        System.out.println("enter " + this);
         if (inSimplex(point)) {
             if (layer < LAYERS - 1) {
                 try {
@@ -100,6 +128,7 @@ public abstract class LinkedSimplex {
 
     LinkedSimplex insert(MultiPoint point) {
         AtomicBoolean grow = new AtomicBoolean(true);
+        System.out.println("insert enter " + point);
         return search(point, 0,
                 (currentSimplex, lowerSimplex) -> currentSimplex.splitUpperLevelSimplex(point, lowerSimplex, grow),
                 currentSimplex -> currentSimplex.splitBase(point, null, grow));
@@ -181,11 +210,13 @@ public abstract class LinkedSimplex {
         if (getValue() == null) {
             setValue(point);
             grow.set(false);
+            System.out.println("found empty" + this);
             return this; //or it's better to return this?
         }
 
         if (getValue().equals(point)) {
             grow.set(false);
+            System.out.println("found same");
             return this;
         }
         return split(point, newSimplex);

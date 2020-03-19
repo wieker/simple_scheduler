@@ -108,7 +108,7 @@ public class SimplexLinkedGraphTwoReal extends LinkedSimplex {
     protected MultiPoint median(MultiPoint aPoint, MultiPoint bPoint) {
         MultiPointImplTwo a = (MultiPointImplTwo) aPoint;
         MultiPointImplTwo b = (MultiPointImplTwo) bPoint;
-        return MultiPointImplTwo.cmp((a.getX() + b.getX()) / 2, (a.getY() + b.getX()) / 2);
+        return MultiPointImplTwo.cmp((a.getX() + b.getX()) / 2, (a.getY() + b.getY()) / 2);
     }
 
     @Override
