@@ -160,7 +160,7 @@ public class SimplexLinkedGraphTwoReal extends LinkedSimplex {
         }
     }
 
-    private static LinkedSimplex createForLayer(int layer) {
+    public static LinkedSimplex createForLayer(int layer) {
         if (layer == LAYERS) {
             return null;
         }
