@@ -5,9 +5,6 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
 		http://www.springframework.org/schema/beans/spring-beans-2.5.xsd http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd">
 
-    <context:annotation-config />
-    <context:component-scan base-package="org.allesoft.enterprise.netty"/>
-
     <bean name="bossGroup" class="io.netty.channel.nio.NioEventLoopGroup"/>
     <bean name="workerGroup" class="io.netty.channel.nio.NioEventLoopGroup"/>
 
@@ -15,5 +12,18 @@
         <constructor-arg name="serverBootstrap" ref="serverBootstrap"/>
         <constructor-arg name="tcpPort" value="8082"/>
     </bean>
+
+    <bean name="serverBootstrap" class="io.netty.bootstrap.ServerBootstrap" factory-method="serverBootstrap" factory-bean="springConfigHelper">
+        <constructor-arg name="bossGroup" ref="bossGroup"/>
+        <constructor-arg name="workerGroup" ref="workerGroup"/>
+        <constructor-arg>
+            <bean class="io.netty.channel.ChannelInitializer" factory-method="channelInit" factory-bean="springConfigHelper">
+                <constructor-arg>
+                    <bean class="org.allesoft.enterprise.netty.ChHandler"/>
+                </constructor-arg>
+            </bean>
+        </constructor-arg>
+    </bean>
+    <bean name="springConfigHelper" class="org.allesoft.enterprise.netty.SpringConfig"/>
 
 </beans>
