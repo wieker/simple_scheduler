@@ -18,7 +18,7 @@ public class SpringConfig {
         return b;
     }
 
-    private ChannelInitializer<SocketChannel> channelInit(final ChHandler chHandler) {
+    public ChannelInitializer<SocketChannel> channelInit(final ChHandler chHandler) {
         return new ChannelInitializer<SocketChannel>() {
             @Override
             public void initChannel(SocketChannel ch) throws Exception {
