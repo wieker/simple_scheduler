@@ -1,37 +1,46 @@
 package org.allesoft.enterprise;
 
-import org.apache.catalina.WebResourceRoot;
-import org.apache.catalina.core.StandardContext;
+import org.apache.catalina.Context;
 import org.apache.catalina.startup.Tomcat;
-import org.apache.catalina.webresources.DirResourceSet;
-import org.apache.catalina.webresources.StandardRoot;
+import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
+import org.springframework.web.servlet.DispatcherServlet;
 
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
+import java.io.IOException;
+import java.io.Writer;
 
 public class SimpleServer {
     public static void main(String[] args) throws Exception {
-        String webappDirLocation = "enterprise/src/main/webapp/";
         Tomcat tomcat = new Tomcat();
+        tomcat.setPort(8080);
+        tomcat.getConnector();
 
-        //The port that we should run on can be set into an environment variable
-        //Look for that variable and default to 8080 if it isn't there.
-        String webPort = System.getenv("PORT");
-        if(webPort == null || webPort.isEmpty()) {
-            webPort = "8080";
-        }
+        Context ctx = tomcat.addContext("", new File("tmp").getAbsolutePath());
 
-        tomcat.setPort(Integer.valueOf(webPort));
+        Tomcat.addServlet(ctx, "hello", new HttpServlet() {
+            private static final long serialVersionUID = 3600060857537422698L;
 
-        StandardContext ctx = (StandardContext) tomcat.addWebapp("/", new File(webappDirLocation).getAbsolutePath());
-        System.out.println("configuring app with basedir: " + new File("./" + webappDirLocation).getAbsolutePath());
+            @Override
+            protected void service(HttpServletRequest request, HttpServletResponse response)
+                    throws ServletException, IOException {
+                response.setCharacterEncoding("UTF-8");
+                response.setContentType("text/plain");
+                try (Writer writer = response.getWriter()) {
+                    writer.write("Hello, Embedded World from Blue Lotus Software!");
+                    writer.flush();
+                }
+            }
+        });
+        ctx.addServletMappingDecoded("/hello", "hello");
 
-        // Declare an alternative location for your "WEB-INF/classes" dir
-        // Servlet 3.0 annotation will work
-        File additionWebInfClasses = new File("target/classes");
-        WebResourceRoot resources = new StandardRoot(ctx);
-        resources.addPreResources(new DirResourceSet(resources, "/WEB-INF/classes",
-                additionWebInfClasses.getAbsolutePath(), "/"));
-        ctx.setResources(resources);
+        AnnotationConfigWebApplicationContext webApplicationContext = new AnnotationConfigWebApplicationContext();
+        webApplicationContext.scan("org.allesoft.enterprise");
+        Tomcat.addServlet(ctx, "spring", new DispatcherServlet(webApplicationContext));
+        ctx.addServletMappingDecoded("/", "spring");
 
         tomcat.start();
         tomcat.getServer().await();
