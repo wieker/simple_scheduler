@@ -16,7 +16,7 @@ import java.io.Writer;
 public class SimpleServer {
     public static void main(String[] args) throws Exception {
         Tomcat tomcat = new Tomcat();
-        tomcat.setPort(8080);
+        tomcat.setPort(8081);
         tomcat.getConnector();
 
         Context ctx = tomcat.addContext("", new File("tmp").getAbsolutePath());

@@ -14,6 +14,19 @@
     </properties>
 
     <dependencies>
+
+        <dependency>
+            <groupId>org.eclipse.jetty.websocket</groupId>
+            <artifactId>websocket-server</artifactId>
+            <version>9.4.26.v20200117</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.glassfish.tyrus.bundles</groupId>
+            <artifactId>tyrus-standalone-client</artifactId>
+            <version>1.9</version>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
@@ -79,7 +92,7 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
                     <source>1.8</source>
-                    <target>`.8`</target>
+                    <target>1.8</target>
                 </configuration>
             </plugin>
         </plugins>
