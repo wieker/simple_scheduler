@@ -13,10 +13,20 @@ import org.springframework.context.NoSuchMessageException;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
+import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
+import org.springframework.web.servlet.HandlerAdapter;
+import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.web.servlet.ViewResolver;
+import org.springframework.web.servlet.mvc.condition.PatternsRequestCondition;
+import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
+import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
+import org.springframework.web.servlet.mvc.method.annotation.RequestResponseBodyMethodProcessor;
+import org.springframework.web.servlet.view.ViewResolverComposite;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -27,6 +37,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
 import java.lang.annotation.Annotation;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -55,8 +66,22 @@ public class SimpleContextServer {
         });
         ctx.addServletMappingDecoded("/hello", "hello");
 
-        Map<String, HandlerMapping> beans = new HashMap<>();
-        beans.put("default", new RequestMappingHandlerMapping());
+        Map<String, HandlerMapping> mappers = new HashMap<>();
+        Map<String, HandlerAdapter> adapters = new HashMap<>();
+        RequestMappingHandlerMapping handlerMapping = new RequestMappingHandlerMapping();
+        mappers.put("default", handlerMapping);
+        RequestMappingHandlerAdapter handlerAdapter = new RequestMappingHandlerAdapter();
+        adapters.put("default", handlerAdapter);
+        handlerAdapter.setReturnValueHandlers(Arrays.asList(new RequestResponseBodyMethodProcessor(Arrays.asList(new StringHttpMessageConverter()))));
+
+        Map<String, HandlerExceptionResolver> exceptionResolverMap = new HashMap<>();
+        exceptionResolverMap.put("default", new ExceptionHandlerExceptionResolver());
+
+        Map<String, ViewResolver> viewResolverMap = new HashMap<>();
+        viewResolverMap.put("default", new ViewResolverComposite());
+
+
+        handlerMapping.registerMapping(new RequestMappingInfo(new PatternsRequestCondition("spring"), null, null, null, null, null, null), new SimpleController(), SimpleController.class.getMethod("check"));
 
         WebApplicationContext webApplicationContext = new WebApplicationContext() {
             @Override
@@ -146,7 +171,8 @@ public class SimpleContextServer {
 
             @Override
             public <T> Map<String, T> getBeansOfType(Class<T> aClass, boolean b, boolean b1) throws BeansException {
-                return (Map<String, T>) beans;
+                return aClass.getSimpleName().contains("Adapter") ? (Map<String, T>) adapters : aClass.getSimpleName().contains("Mappin") ? (Map<String, T>) mappers :
+                        aClass.getSimpleName().contains("Exception") ? (Map<String, T>) exceptionResolverMap : aClass.getSimpleName().contains("View") ? (Map<String, T>) viewResolverMap : null;
             }
 
             @Override
