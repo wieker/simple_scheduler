@@ -28,31 +28,14 @@
     <bean name="controlQueue" class="java.util.concurrent.ConcurrentLinkedQueue" factory-bean="queueProvider" factory-method="controlQueue"/>
 
     <bean name="queueFiller" class="org.allesoft.enterprise_db.QueueFrontServiceImpl">
-        <constructor-arg name="fillers">
-            <list>
-                <bean factory-bean="fillerProvider" factory-method="filler">
-                    <constructor-arg name="dataQueue" ref="dataQueue"/>
-                    <constructor-arg name="controlQueue" ref="controlQueue"/>
-                    <constructor-arg name="pushSize" value="100"/>
-                </bean>
-                <bean factory-bean="fillerProvider" factory-method="filler">
-                    <constructor-arg name="dataQueue" ref="dataQueue"/>
-                    <constructor-arg name="controlQueue" ref="controlQueue"/>
-                    <constructor-arg name="pushSize" value="100"/>
-                </bean>
-                <bean factory-bean="fillerProvider" factory-method="filler">
-                    <constructor-arg name="dataQueue" ref="dataQueue"/>
-                    <constructor-arg name="controlQueue" ref="controlQueue"/>
-                    <constructor-arg name="pushSize" value="100"/>
-                </bean>
-                <bean factory-bean="fillerProvider" factory-method="filler">
-                    <constructor-arg name="dataQueue" ref="dataQueue"/>
-                    <constructor-arg name="controlQueue" ref="controlQueue"/>
-                    <constructor-arg name="pushSize" value="100"/>
-                </bean>
-            </list>
-        </constructor-arg>
         <constructor-arg ref="queueFillExecutor"/>
+        <constructor-arg value="20"/>
+    </bean>
+
+    <bean name="filler" scope="prototype" factory-bean="fillerProvider" factory-method="filler">
+        <constructor-arg name="dataQueue" ref="dataQueue"/>
+        <constructor-arg name="controlQueue" ref="controlQueue"/>
+        <constructor-arg name="pushSize" value="100"/>
     </bean>
 
 </beans>
