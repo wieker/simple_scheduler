@@ -19,6 +19,7 @@ public class Client {
         XMPPTCPConnection connection = new XMPPTCPConnection(config);
         connection = connection;
 
+
         connection.connect();
 
         connection.login();
