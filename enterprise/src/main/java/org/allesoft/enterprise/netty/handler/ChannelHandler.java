@@ -1,9 +1,9 @@
-package org.allesoft.enterprise.netty;
+package org.allesoft.enterprise.netty.handler;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 
-public class ChHandler extends ChannelInboundHandlerAdapter {
+public class ChannelHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
         ctx.write(msg);

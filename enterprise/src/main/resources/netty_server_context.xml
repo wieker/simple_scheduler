@@ -16,13 +16,11 @@
         <constructor-arg name="bossGroup" ref="bossGroup"/>
         <constructor-arg name="workerGroup" ref="workerGroup"/>
         <constructor-arg>
-            <bean class="io.netty.channel.ChannelInitializer" factory-method="channelInit" factory-bean="springConfigHelper">
-                <constructor-arg>
-                    <bean class="org.allesoft.enterprise.netty.ChHandler"/>
-                </constructor-arg>
-            </bean>
+            <bean class="io.netty.channel.ChannelInitializer" factory-method="channelInit"
+                  factory-bean="springConfigHelper"/>
         </constructor-arg>
     </bean>
     <bean name="springConfigHelper" class="org.allesoft.enterprise.netty.SpringConfig"/>
+    <bean name="channelHandler" class="org.allesoft.enterprise.netty.handler.ChannelHandler" scope="prototype"/>
 
 </beans>
