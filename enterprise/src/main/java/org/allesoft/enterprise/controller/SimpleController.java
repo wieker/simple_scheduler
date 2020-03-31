@@ -1,4 +1,4 @@
-package org.allesoft.enterprise;
+package org.allesoft.enterprise.controller;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;

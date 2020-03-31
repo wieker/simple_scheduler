@@ -2,6 +2,7 @@ package org.allesoft.enterprise;
 
 import org.apache.catalina.Context;
 import org.apache.catalina.startup.Tomcat;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 
@@ -19,7 +20,7 @@ public class SimpleServer {
         tomcat.setPort(8081);
         tomcat.getConnector();
 
-        Context ctx = tomcat.addContext("", new File("tmp").getAbsolutePath());
+        Context ctx = tomcat.addContext("", new File("d2").getAbsolutePath());
 
         Tomcat.addServlet(ctx, "hello", new HttpServlet() {
             private static final long serialVersionUID = 3600060857537422698L;
@@ -38,7 +39,8 @@ public class SimpleServer {
         ctx.addServletMappingDecoded("/hello", "hello");
 
         AnnotationConfigWebApplicationContext webApplicationContext = new AnnotationConfigWebApplicationContext();
-        webApplicationContext.scan("org.allesoft.enterprise");
+        webApplicationContext.register(MappingJackson2HttpMessageConverter.class);
+        webApplicationContext.scan("org.allesoft.enterprise.configurable.controller");
         Tomcat.addServlet(ctx, "spring", new DispatcherServlet(webApplicationContext));
         ctx.addServletMappingDecoded("/", "spring");
 

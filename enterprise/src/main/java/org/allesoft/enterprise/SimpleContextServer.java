@@ -1,5 +1,6 @@
 package org.allesoft.enterprise;
 
+import org.allesoft.enterprise.controller.SimpleController;
 import org.apache.catalina.Context;
 import org.apache.catalina.startup.Tomcat;
 import org.springframework.beans.BeansException;
