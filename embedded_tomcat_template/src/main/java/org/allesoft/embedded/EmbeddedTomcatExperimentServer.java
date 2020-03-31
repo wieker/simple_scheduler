@@ -2,13 +2,17 @@ package org.allesoft.embedded;
 
 import org.apache.catalina.Context;
 import org.apache.catalina.startup.Tomcat;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 
 import java.io.File;
 
-public class ExperimentServer1 {
+public class EmbeddedTomcatExperimentServer {
     public static void main(String[] args) throws Exception {
+        ApplicationContext applicationContext = new ClassPathXmlApplicationContext("application_context.xml");
+
         Tomcat tomcat = new Tomcat();
         tomcat.setPort(8081);
         tomcat.getConnector();
@@ -16,7 +20,7 @@ public class ExperimentServer1 {
         Context ctx = tomcat.addContext("", new File("d2").getAbsolutePath());
 
         AnnotationConfigWebApplicationContext webApplicationContext = new AnnotationConfigWebApplicationContext();
-        webApplicationContext.scan("org.allesoft.embedded.configurable");
+        webApplicationContext.setParent(applicationContext);
         Tomcat.addServlet(ctx, "spring", new DispatcherServlet(webApplicationContext));
         ctx.addServletMappingDecoded("/", "spring");
 
