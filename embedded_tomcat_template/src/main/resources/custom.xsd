@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<xsd:schema xmlns="http://www.allesoft.org/schema/custom"
+            xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            xmlns:beans="http://www.springframework.org/schema/beans"
+            xmlns:tool="http://www.springframework.org/schema/tool"
+            targetNamespace="http://www.allesoft.org/schema/custom"
+            elementFormDefault="qualified"
+            attributeFormDefault="unqualified">
+
+    <xsd:element name="custom">
+        <xsd:annotation>
+            <xsd:documentation source="java:org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter"><![CDATA[
+	Custom XML configuration tag
+			]]></xsd:documentation>
+        </xsd:annotation>
+    </xsd:element>
+
+</xsd:schema>
