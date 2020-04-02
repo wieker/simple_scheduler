@@ -1,0 +1,1 @@
+create table values_tbl (str varchar(200));

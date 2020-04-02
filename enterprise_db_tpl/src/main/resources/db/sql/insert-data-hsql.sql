@@ -1,0 +1,1 @@
+insert into values_tbl (str) values ('initial');
