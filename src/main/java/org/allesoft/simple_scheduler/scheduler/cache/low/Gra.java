@@ -16,24 +16,24 @@ import static org.allesoft.simple_scheduler.scheduler.cache.low.MultiPointImplTw
 
 public class Gra {
     public static void main(String[] args) {
-        LinkedSimplex forLayer = SimplexLinkedGraphTwoReal.createForLayer(0);
+        LinkedSimplex<MultiPointImplTwo> forLayer = SimplexLinkedGraphTwoReal.createForLayer(0);
 
         JFrame window = new JFrame();
         window.setVisible(true);
         window.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        AtomicReference<LinkedSimplex> simplex = new AtomicReference<>(forLayer);
+        AtomicReference<LinkedSimplex<MultiPointImplTwo>> simplex = new AtomicReference<>(forLayer);
 
         JComponent canvas = new JComponent() {
             @Override
             protected void paintComponent(Graphics g) {
-                LinkedSimplex initial = simplex.get();
-                Set<LinkedSimplex> passed = new HashSet<>();
+                LinkedSimplex<MultiPointImplTwo> initial = simplex.get();
+                Set<LinkedSimplex<MultiPointImplTwo>> passed = new HashSet<>();
                 draw(g, initial, passed);
             }
 
-            private void draw(Graphics g, LinkedSimplex simplex, Set<LinkedSimplex> passed) {
+            private void draw(Graphics g, LinkedSimplex<MultiPointImplTwo> simplex, Set<LinkedSimplex<MultiPointImplTwo>> passed) {
                 passed.add(simplex);
-                List<MultiPoint> boundaries = new ArrayList<>(simplex.getBoundaries());
+                List<MultiPointImplTwo> boundaries = new ArrayList<>(simplex.getBoundaries());
                 int size = boundaries.size();
                 for (int i = 0; i < size; i++) {
                     MultiPointImplTwo curr = (MultiPointImplTwo) boundaries.get(i);
@@ -43,7 +43,7 @@ public class Gra {
                     double scale = 20;
                     g.drawLine(centerX + (int) (curr.getX() * scale), centerY + (int) (curr.getY() * scale), centerX + (int) (next.getX() * scale), centerY + (int) (next.getY() * scale));
                 }
-                for (LinkedSimplex next : simplex.getNeighbours()) {
+                for (LinkedSimplex<MultiPointImplTwo> next : simplex.getNeighbours()) {
                     if (!passed.contains(next)) {
                         draw(g, next, passed);
                     }

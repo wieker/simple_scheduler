@@ -2,6 +2,7 @@ package org.allesoft.simple_scheduler.cache.low;
 
 import org.allesoft.simple_scheduler.scheduler.cache.low.LinkedSimplex;
 import org.allesoft.simple_scheduler.scheduler.cache.low.MultiPoint;
+import org.allesoft.simple_scheduler.scheduler.cache.low.MultiPointImplTwo;
 import org.allesoft.simple_scheduler.scheduler.cache.low.SimplexLinkedGraphTwoReal;
 import org.junit.Test;
 
@@ -18,11 +19,11 @@ import static org.junit.Assert.assertThat;
 public class AlgTest {
     @Test
     public void check1() {
-        List<LinkedSimplex> neighbours = new ArrayList<>();
-        List<MultiPoint> boundaries = Arrays.asList(cmp(0, 0), cmp(50, 100), cmp(100, 0));
-        LinkedSimplex simplex = new SimplexLinkedGraphTwoReal(neighbours, null, boundaries, cmp(30, 30));
+        List<LinkedSimplex<MultiPointImplTwo>> neighbours = new ArrayList<>();
+        List<MultiPointImplTwo> boundaries = Arrays.asList(cmp(0, 0), cmp(50, 100), cmp(100, 0));
+        LinkedSimplex<MultiPointImplTwo> simplex = new SimplexLinkedGraphTwoReal(neighbours, null, boundaries, cmp(30, 30));
 
-        LinkedSimplex onePart = simplex.split(cmp(15, 15), null);
+        LinkedSimplex<MultiPointImplTwo> onePart = simplex.split(cmp(15, 15), null);
 
         assertNotEquals(simplex, onePart);
         assertThat(onePart.getNeighbours().size(), is(2));
@@ -31,11 +32,11 @@ public class AlgTest {
 
     @Test
     public void check2() {
-        List<LinkedSimplex> neighbours = new ArrayList<>();
-        List<MultiPoint> boundaries = Arrays.asList(cmp(0, 0), cmp(50, 100), cmp(100, 0));
-        LinkedSimplex simplex = new SimplexLinkedGraphTwoReal(neighbours, null, boundaries, cmp(30, 30));
+        List<LinkedSimplex<MultiPointImplTwo>> neighbours = new ArrayList<>();
+        List<MultiPointImplTwo> boundaries = Arrays.asList(cmp(0, 0), cmp(50, 100), cmp(100, 0));
+        LinkedSimplex<MultiPointImplTwo> simplex = new SimplexLinkedGraphTwoReal(neighbours, null, boundaries, cmp(30, 30));
 
-        LinkedSimplex onePart = simplex.split(cmp(15, 15), null);
+        LinkedSimplex<MultiPointImplTwo> onePart = simplex.split(cmp(15, 15), null);
 
         assertNotEquals(simplex, onePart);
         assertThat(simplex.getNeighbours().size(), is(2));
