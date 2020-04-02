@@ -10,6 +10,7 @@ public class InterceptedExperimentDaoTest {
     private InterceptedExperimentDao proxyDao;
     private InterceptedExperimentDao customTxDao;
     private InterceptedExperimentDao txDsDao;
+    private InterceptedExperimentDao customTxDaoWithSync;
 
     @Before
     public void setup() {
@@ -20,6 +21,7 @@ public class InterceptedExperimentDaoTest {
         proxyDao = (InterceptedExperimentDao) applicationContext.getBean("proxyDao");
         customTxDao = (InterceptedExperimentDao) applicationContext.getBean("customTxDao");
         txDsDao = (InterceptedExperimentDao) applicationContext.getBean("txDsDao");
+        customTxDaoWithSync = (InterceptedExperimentDao) applicationContext.getBean("customTxDaoWithSync");
     }
 
     @Test
@@ -30,6 +32,7 @@ public class InterceptedExperimentDaoTest {
         checkDao(customTxDao);
         checkDao(txDsDao);
         checkDao(customTxDao);
+        checkDao(customTxDaoWithSync);
     }
 
     private void checkDao(InterceptedExperimentDao dao) {

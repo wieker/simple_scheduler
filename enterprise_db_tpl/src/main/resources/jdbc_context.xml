@@ -84,4 +84,16 @@
         <constructor-arg name="dataSource" ref="txDataSource"/>
     </bean>
 
+    <bean id="customTxDaoWithSync" class="org.springframework.aop.framework.ProxyFactoryBean">
+        <property name="target" ref="daoWithSync" />
+        <property name="proxyTargetClass" value="false" />
+        <property name="interceptorNames">
+            <list><value>autocommitInterceptor</value></list>
+        </property>
+    </bean>
+
+    <bean id="daoWithSync" class="org.allesoft.embedded.configurable.dao.InterceptedExperimentWithSyncDaoImpl">
+        <constructor-arg name="jdbcTemplate" ref="jdbcTemplate"/>
+    </bean>
+
 </beans>
