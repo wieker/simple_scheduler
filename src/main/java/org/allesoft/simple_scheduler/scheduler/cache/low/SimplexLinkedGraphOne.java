@@ -8,7 +8,7 @@ import java.util.Set;
 
 public class SimplexLinkedGraphOne extends LinkedSimplex<MultiPointImplOne> {
     public SimplexLinkedGraphOne(Collection<LinkedSimplex<MultiPointImplOne>> neighbours, LinkedSimplex<MultiPointImplOne> nextLayer, Collection<MultiPointImplOne> boundaries, MultiPointImplOne value) {
-        super(neighbours, nextLayer, boundaries, value);
+        super(neighbours, nextLayer, boundaries, value, new Splitter<>());
     }
 
     @Override
