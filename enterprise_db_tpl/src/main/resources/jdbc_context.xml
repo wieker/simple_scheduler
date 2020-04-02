@@ -76,4 +76,12 @@
         </property>
     </bean>
 
+    <bean id="txDataSource" class="org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy">
+        <constructor-arg ref="dbcpDataSource"/>
+    </bean>
+
+    <bean id="txDsDao" class="org.allesoft.embedded.configurable.dao.InterceptedExperimentJdbcDaoImpl">
+        <constructor-arg name="dataSource" ref="txDataSource"/>
+    </bean>
+
 </beans>
