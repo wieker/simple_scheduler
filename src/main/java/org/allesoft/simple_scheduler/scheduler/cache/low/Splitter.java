@@ -1,15 +1,14 @@
 package org.allesoft.simple_scheduler.scheduler.cache.low;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
+
+import static org.allesoft.simple_scheduler.scheduler.cache.low.LinkedSimplex.DIMENSIONS;
+import static org.allesoft.simple_scheduler.scheduler.cache.low.LinkedSimplex.newInstance;
 
 public class Splitter<T extends MultiPoint<T>> {
     public LinkedSimplex<T> split(T point, LinkedSimplex<T> next, LinkedSimplex<T> simplex) {
@@ -18,70 +17,95 @@ public class Splitter<T extends MultiPoint<T>> {
         // 3. value
         // 4. nei border - read only
         // 5. nei neighs - replace only
-        System.out.println("insert " + point + " into " + simplex.getValue());
-        System.out.println(this);
-        for (LinkedSimplex<T> s : simplex.getNeighbours()) {
-            System.out.println(s);
-        }
-
         T median = point.median(point, simplex.getValue());
-        System.out.println(median);
 
-        Collection<LinkedSimplex<T>> newSimplexes = new ArrayList<>(simplex.DIMENSIONS + 1);
-
-        AtomicReference<LinkedSimplex<T>> withValue = new AtomicReference<>();
-        List<T> border = new ArrayList<>(simplex.getBoundaries());
         List<T> oldBorder = Collections.unmodifiableList(new ArrayList<>(simplex.getBoundaries()));
-        Map<LinkedSimplex<T>, Optional<LinkedSimplex<T>>> neighs = new HashMap<>();
-        oldBorder.forEach(vertex -> {
-            border.remove(vertex);
-            border.add(median);
-            LinkedSimplex<T> newInstance = simplex.newInstance(Collections.unmodifiableList(border));
-            System.out.println("newInstance: " + newInstance);
-            if (simplex.getValue().inSimplex(newInstance)) {
-                System.out.println("old");
-                newInstance.setValue(simplex.getValue());
-                newInstance.setNextLayer(simplex.getNextLayer());
-            } else if (point.inSimplex(newInstance)) {
-                System.out.println("new");
-                newInstance.setValue(point);
-                newInstance.setNextLayer(next);
-                withValue.set(newInstance);
-            }
-            newSimplexes.add(newInstance);
-            border.remove(median);
-            neighs.put(newInstance, simplex.neighbourForThisHyperWall(border));
-            border.add(vertex);
-        });
-        newSimplexes.forEach(s -> {
-            List<LinkedSimplex<T>> newNighs = new ArrayList<>(newSimplexes);
-            newNighs.remove(s);
-            neighs.get(s).ifPresent(newNighs::add);
-            neighs.get(s).ifPresent(t -> t.replaceNeighbour(simplex, s));
-            s.setNeighbours(newNighs);
-        });
+        List<List<T>> oldNeighBorders = getOldNeighBorders(oldBorder);
+        List<Optional<LinkedSimplex<T>>> orderedOldNeighbours = orderedOldNeighbours(simplex, oldNeighBorders);
+        List<List<T>> newBorders = newBorders(median, oldNeighBorders);
+        List<T> newValues = newValues(point, simplex, newBorders);
+        List<LinkedSimplex<T>> newNexts = newNexts(point, next, simplex, newBorders);
+        List<LinkedSimplex<T>> newSimplexes = newSimplexes(newBorders, newValues, newNexts);
+        List<List<LinkedSimplex<T>>> newNeighbours = newNeighbours(orderedOldNeighbours, newSimplexes);
+        setNeighbours(newSimplexes, newNeighbours);
+        adjustNeighbours(simplex, orderedOldNeighbours, newSimplexes);
 
-        size += 2;
-        int i = deepSearch(0, new HashSet<>(), withValue.get());
-        if (i != size) {
-            throw new RuntimeException("deep search fail");
-        }
-        return withValue.get();
+        return newSimplexes.get(0);
     }
 
-    static int size = 1;
-
-    int deepSearch(int d, Set<LinkedSimplex<T>> passed, LinkedSimplex<T> simplexA) {
-        d ++;
-        passed.add(simplexA);
-        for (LinkedSimplex<T> simplex : simplexA.getNeighbours()) {
-            if (!simplex.getNeighbours().contains(this)) {
-                throw new RuntimeException("unconnected");
-            }
-            if (!passed.contains(simplex)) {
-                d = deepSearch(d, passed, simplexA);
+    public void adjustNeighbours(LinkedSimplex<T> simplex, List<Optional<LinkedSimplex<T>>> orderedOldNeighbours, List<LinkedSimplex<T>> newSimplexes) {
+        for (int i = 0; i < orderedOldNeighbours.size(); i ++) {
+            if (orderedOldNeighbours.get(i).isPresent()) {
+                orderedOldNeighbours.get(i).get().replaceNeighbour(simplex, newSimplexes.get(i));
             }
         }
-        return d;
+    }
+
+    public void setNeighbours(List<LinkedSimplex<T>> newSimplexes, List<List<LinkedSimplex<T>>> newNeighbours) {
+        for (int i = 0; i < newSimplexes.size(); i ++) {
+            newSimplexes.get(i).setNeighbours(newNeighbours.get(i));
+        }
+    }
+
+    public List<List<LinkedSimplex<T>>> newNeighbours(List<Optional<LinkedSimplex<T>>> orderedOldNeighbours, List<LinkedSimplex<T>> newSimplexes) {
+        List<List<LinkedSimplex<T>>> newNeighbours = new ArrayList<>(DIMENSIONS + 1);
+        for (int i = 0; i < newSimplexes.size(); i ++) {
+            ArrayList<LinkedSimplex<T>> newList = new ArrayList<>(newSimplexes);
+            orderedOldNeighbours.get(i).ifPresent(newList::add);
+            newList.remove(newSimplexes.get(i));
+            newNeighbours.add(newList);
+        }
+        return newNeighbours;
+    }
+
+    public List<LinkedSimplex<T>> newSimplexes(List<List<T>> newBorders, List<T> newValues, List<LinkedSimplex<T>> newNexts) {
+        List<LinkedSimplex<T>> newSimplexes = new ArrayList<>(DIMENSIONS + 1);
+        for (int i = 0; i < newBorders.size(); i ++) {
+            LinkedSimplex<T> newInstance = newInstance(newBorders.get(i), this);
+            newInstance.setValue(newValues.get(i));
+            newInstance.setNextLayer(newNexts.get(i));
+            newSimplexes.add(newInstance);
+        }
+        return newSimplexes;
+    }
+
+    public List<LinkedSimplex<T>> newNexts(T point, LinkedSimplex<T> next, LinkedSimplex<T> simplex, List<List<T>> newBorders) {
+        AtomicReference<LinkedSimplex<T>> newValue = new AtomicReference<>(simplex.getNextLayer());
+        AtomicReference<LinkedSimplex<T>> pointValue = new AtomicReference<>(next);
+        return newBorders.stream().map(newBoundaries -> {
+                return simplex.getValue().inSimplex(newBoundaries) ? newValue.getAndSet(null) :
+                        point.inSimplex(newBoundaries) ? pointValue.getAndSet(null) : null;
+            }).collect(Collectors.toList());
+    }
+
+    public List<T> newValues(T point, LinkedSimplex<T> simplex, List<List<T>> newBorders) {
+        AtomicReference<T> newValue = new AtomicReference<>(simplex.getValue());
+        AtomicReference<T> pointValue = new AtomicReference<>(point);
+        return newBorders.stream().map(newBoundaries -> {
+                return simplex.getValue().inSimplex(newBoundaries) ? newValue.getAndSet(null) :
+                        point.inSimplex(newBoundaries) ? pointValue.getAndSet(null) : null;
+            }).collect(Collectors.toList());
+    }
+
+    public List<List<T>> newBorders(T median, List<List<T>> oldNeighBorders) {
+        return oldNeighBorders.stream().map(list -> {
+                ArrayList<T> newList = new ArrayList<>(list);
+                newList.add(median);
+                return newList;
+            }).collect(Collectors.toList());
+    }
+
+    public List<Optional<LinkedSimplex<T>>> orderedOldNeighbours(LinkedSimplex<T> simplex, List<List<T>> oldNeighBorders) {
+        return oldNeighBorders.stream().map(simplex::neighbourForThisHyperWall).collect(Collectors.toList());
+    }
+
+    public List<List<T>> getOldNeighBorders(List<T> oldBorder) {
+        List<List<T>> neighBorders = new ArrayList<>();
+        oldBorder.forEach(vertex -> {
+            List<T> neighBorder = new ArrayList<>(oldBorder);
+            neighBorder.remove(vertex);
+            neighBorders.add(neighBorder);
+        });
+        return neighBorders;
     }
 }

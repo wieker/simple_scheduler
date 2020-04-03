@@ -42,7 +42,7 @@ public class LinkedSimplex<T extends MultiPoint<T>> {
                          Function<LinkedSimplex<T>, LinkedSimplex<T>> finalProcesor, Set<LinkedSimplex<T>> visited) {
         System.out.println("enter " + this);
         visited.add(this);
-        if (point.inSimplex(this)) {
+        if (point.inSimplex(this.getBoundaries())) {
             if (layer < LAYERS - 1) {
                 try {
                     return processor.apply(this, nextLayer.search(point, layer + 1, processor, finalProcesor, visited));
@@ -65,8 +65,8 @@ public class LinkedSimplex<T extends MultiPoint<T>> {
                 currentSimplex -> currentSimplex.splitBase(point, null, grow), new HashSet<LinkedSimplex<T>>());
     }
 
-    protected LinkedSimplex<T> newInstance(List<T> border) {
-        return new LinkedSimplex<T>(null, null, new ArrayList<>(border), null, splitter);
+    protected static <E extends MultiPoint<E>> LinkedSimplex<E> newInstance(List<E> border, Splitter<E> splitter) {
+        return new LinkedSimplex<E>(null, null, new ArrayList<>(border), null, splitter);
     }
 
     public Collection<LinkedSimplex<T>> getNeighbours() {
@@ -133,7 +133,7 @@ public class LinkedSimplex<T extends MultiPoint<T>> {
 
     private LinkedSimplex<T> splitUpperLevelSimplex(T point, LinkedSimplex<T> newSimplex, AtomicBoolean grow) {
         if (grow.get() && new Random().nextBoolean()) {
-            return split(point, newSimplex, null);
+            return split(point, newSimplex, splitter);
         }
         grow.set(false);
         return this;
@@ -152,10 +152,6 @@ public class LinkedSimplex<T extends MultiPoint<T>> {
             System.out.println("found same");
             return this;
         }
-        return split(point, newSimplex, null);
-    }
-
-    public Splitter<T> getSplitter() {
-        return splitter;
+        return split(point, newSimplex, splitter);
     }
 }

@@ -1,5 +1,6 @@
 package org.allesoft.simple_scheduler.scheduler.cache.low;
 
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Optional;
@@ -30,9 +31,9 @@ public class MultiPointImplOne extends MultiPoint<MultiPointImplOne> {
     }
 
     @Override
-    public boolean inSimplex(LinkedSimplex<MultiPointImplOne> simplexLinkedGraphOne) {
+    public boolean inSimplex(Collection<MultiPointImplOne> boundaries) {
         MultiPointImplOne point = (MultiPointImplOne) this;
-        Iterator<MultiPointImplOne> iterator = simplexLinkedGraphOne.getBoundaries().iterator();
+        Iterator<MultiPointImplOne> iterator = boundaries.iterator();
         int a = ((MultiPointImplOne)iterator.next()).getPos();
         int b = ((MultiPointImplOne)iterator.next()).getPos();
         return point.getPos() >= min(a, b) && point.getPos() < max(a, b);

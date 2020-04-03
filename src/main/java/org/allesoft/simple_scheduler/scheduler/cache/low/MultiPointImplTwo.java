@@ -1,6 +1,7 @@
 package org.allesoft.simple_scheduler.scheduler.cache.low;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;
@@ -89,9 +90,9 @@ public class MultiPointImplTwo extends MultiPoint<MultiPointImplTwo> {
     }
 
     @Override
-    public boolean inSimplex(LinkedSimplex<MultiPointImplTwo> simplexLinkedGraphTwoReal) {
+    public boolean inSimplex(Collection<MultiPointImplTwo> boundaries) {
         MultiPointImplTwo point = (MultiPointImplTwo) this;
-        Iterator<MultiPointImplTwo> iterator = simplexLinkedGraphTwoReal.getBoundaries().iterator();
+        Iterator<MultiPointImplTwo> iterator = boundaries.iterator();
         MultiPointImplTwo a = (MultiPointImplTwo) iterator.next();
         MultiPointImplTwo b = ((MultiPointImplTwo)iterator.next());
         MultiPointImplTwo c = ((MultiPointImplTwo)iterator.next());
