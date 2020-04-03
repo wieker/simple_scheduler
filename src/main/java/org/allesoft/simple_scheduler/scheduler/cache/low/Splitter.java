@@ -28,6 +28,7 @@ public class Splitter<T extends MultiPoint<T>> {
         List<LinkedSimplex<T>> newSimplexes = newSimplexes(newBorders, newValues, newNexts);
         List<List<LinkedSimplex<T>>> newNeighbours = newNeighbours(orderedOldNeighbours, newSimplexes);
         setNeighbours(newSimplexes, newNeighbours);
+
         adjustNeighbours(simplex, orderedOldNeighbours, newSimplexes);
 
         return newSimplexes.get(0);

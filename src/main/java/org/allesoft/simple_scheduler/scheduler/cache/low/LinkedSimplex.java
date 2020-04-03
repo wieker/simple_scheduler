@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -18,6 +20,9 @@ public class LinkedSimplex<T extends MultiPoint<T>> {
     private Collection<T> boundaries = new ArrayList<>(DIMENSIONS + 1);
     private T value;
     private Splitter<T> splitter;
+    private AtomicInteger lock = new AtomicInteger(0);
+    private AtomicReference<LinkedSimplex<T>> prevLayer = new AtomicReference<>();
+    private Collection<AtomicReference<LinkedSimplex<T>>> toNeighbours = new ArrayList<>(DIMENSIONS + 1);
 
     public LinkedSimplex(Collection<LinkedSimplex<T>> neighbours, LinkedSimplex<T> nextLayer, Collection<T> boundaries, T value, Splitter<T> splitter) {
         this.neighbours = neighbours != null ? Collections.unmodifiableList(new ArrayList<>(neighbours)) : null;
