@@ -21,7 +21,7 @@ public class Gra {
         JFrame window = new JFrame();
         window.setVisible(true);
         window.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        AtomicReference<LinkedSimplex<MultiPointImplTwo>> simplex = new AtomicReference<>(forLayer);
+        AtomicReference<LinkedSimplex<MultiPointImplTwo>> simplex = forLayer.getSelf();
 
         JComponent canvas = new JComponent() {
             @Override
@@ -44,8 +44,11 @@ public class Gra {
                     g.drawLine(centerX + (int) (curr.getX() * scale), centerY + (int) (curr.getY() * scale), centerX + (int) (next.getX() * scale), centerY + (int) (next.getY() * scale));
                 }
                 for (AtomicReference<LinkedSimplex<MultiPointImplTwo>> next : simplex.getNeighbours()) {
-                    if (!passed.contains(next)) {
-                        draw(g, next.get(), passed);
+                    if (next != null) {
+                        LinkedSimplex<MultiPointImplTwo> simplex1 = next.get();
+                        if (!passed.contains(simplex1)) {
+                            draw(g, simplex1, passed);
+                        }
                     }
                 }
             }
@@ -56,27 +59,27 @@ public class Gra {
                 int centerY = canvas.getHeight() / 4;
                 int centerX = canvas.getWidth() / 4;
                 double scale = 5;
-                simplex.set(simplex.get().insert(cmp((e.getX() - centerX) / scale, (e.getY() - centerY) / scale)));
+                simplex.get().insert(cmp((e.getX() - centerX) / scale, (e.getY() - centerY) / scale)).get();
                 canvas.repaint();
             }
         });
         window.add(canvas);
 
 
-        for (int i = 1; i < 100; i += 10) {
-            for (int j = 1; j < 100 - i; j += 10) {
-                try {
-                    simplex.set(simplex.get().insert(MultiPointImplTwo.cmp(i, j)));
-                } catch (NullPointerException e) {
-
-                }
-                canvas.repaint();
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
+//        for (int i = 1; i < 100; i += 10) {
+//            for (int j = 1; j < 100 - i; j += 10) {
+//                try {
+//                    simplex.set(simplex.get().insert(MultiPointImplTwo.cmp(i, j)));
+//                } catch (NullPointerException e) {
+//
+//                }
+//                canvas.repaint();
+//                try {
+//                    Thread.sleep(100);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        }
     }
 }

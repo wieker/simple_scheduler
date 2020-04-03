@@ -12,7 +12,7 @@ import static org.allesoft.simple_scheduler.scheduler.cache.low.LinkedSimplex.LA
 import static org.allesoft.simple_scheduler.scheduler.cache.low.LinkedSimplex.newInstance;
 
 public class Splitter<T extends MultiPoint<T>> {
-    public LinkedSimplex<T> split(T point, LinkedSimplex<T> next, LinkedSimplex<T> simplex) {
+    public AtomicReference<LinkedSimplex<T>> split(T point, AtomicReference<LinkedSimplex<T>> next, LinkedSimplex<T> simplex) {
         // 1. neighbours
         // 2. border
         // 3. value
@@ -45,6 +45,12 @@ public class Splitter<T extends MultiPoint<T>> {
         List<List<T>> newBorders = newBorders(median, oldNeighBorders);
         List<T> newValues = newValues(point, simplex, newBorders);
         List<LinkedSimplex<T>> newSimplexes = newSimplexes(newBorders, newValues);
+        for (LinkedSimplex<T> s : newSimplexes) {
+            if (s.getValue() != null && simplexValue.equals(s.getValue())) {
+                s.setSelf(simplex.getSelf());
+                s.getSelf().set(s);
+            }
+        }
         newNexts(newSimplexes, next, point);
 
         for (int i = 0; i < newSimplexes.size(); i ++) {
@@ -77,7 +83,7 @@ public class Splitter<T extends MultiPoint<T>> {
             newSimplexes.get(i).getLock().set(0);
         }
 
-        return newSimplexes.get(0);
+        return newSimplexes.stream().filter(s -> s.getValue() != null && point.equals(s.getValue())).findFirst().map(LinkedSimplex::getSelf).orElse(null);
     }
 
     public List<List<T>> tryBorders(T median, LinkedSimplex<T> simplex) {
@@ -112,10 +118,10 @@ public class Splitter<T extends MultiPoint<T>> {
         return newSimplexes;
     }
 
-    public void newNexts(List<LinkedSimplex<T>> newSimplexes, LinkedSimplex<T> next, T point) {
+    public void newNexts(List<LinkedSimplex<T>> newSimplexes, AtomicReference<LinkedSimplex<T>> next, T point) {
         if (next != null) {
             newSimplexes.forEach(simplex -> {
-                simplex.setNextLayer(next.search(point.getSimplexMedian(simplex), LAYERS - 1));
+                simplex.setNextLayer(next.get().search(point.getSimplexMedian(simplex), LAYERS - 1));
             });
         }
     }

@@ -8,7 +8,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class SimplexLinkedGraphOne extends LinkedSimplex<MultiPointImplOne> {
-    public SimplexLinkedGraphOne(Collection<AtomicReference<LinkedSimplex<MultiPointImplOne>>> neighbours, LinkedSimplex<MultiPointImplOne> nextLayer, Collection<MultiPointImplOne> boundaries, MultiPointImplOne value) {
+    public SimplexLinkedGraphOne(Collection<AtomicReference<LinkedSimplex<MultiPointImplOne>>> neighbours, AtomicReference<LinkedSimplex<MultiPointImplOne>> nextLayer, Collection<MultiPointImplOne> boundaries, MultiPointImplOne value) {
         super(neighbours, nextLayer, boundaries, value, new Splitter<>());
     }
 
@@ -30,9 +30,9 @@ public class SimplexLinkedGraphOne extends LinkedSimplex<MultiPointImplOne> {
             linkedSimplex.insert(new MultiPointImplOne(48));
             linkedSimplex.insert(new MultiPointImplOne(49));
 
-            print(linkedSimplex.search(new MultiPointImplOne(1), 0), new HashSet<>());
-            print(linkedSimplex.search(new MultiPointImplOne(1), 1), new HashSet<>());
-            print(linkedSimplex.search(new MultiPointImplOne(1), 2), new HashSet<>());
+            print(linkedSimplex.search(new MultiPointImplOne(1), 0).get(), new HashSet<>());
+            print(linkedSimplex.search(new MultiPointImplOne(1), 1).get(), new HashSet<>());
+            print(linkedSimplex.search(new MultiPointImplOne(1), 2).get(), new HashSet<>());
         }
     }
 
@@ -50,10 +50,10 @@ public class SimplexLinkedGraphOne extends LinkedSimplex<MultiPointImplOne> {
         if (layer == LAYERS) {
             return null;
         }
-        LinkedSimplex<MultiPointImplOne> linkedSimplex = new SimplexLinkedGraphOne(null, null, new ArrayList<>(), null);
+        LinkedSimplex<MultiPointImplOne> linkedSimplex = new SimplexLinkedGraphOne(null, new AtomicReference<>(), new ArrayList<>(), null);
         linkedSimplex.setValue(new MultiPointImplOne(10));
         linkedSimplex.setBoundaries(Arrays.asList(new MultiPointImplOne(0), new MultiPointImplOne(100)));
-        linkedSimplex.setNextLayer(createForLayer(layer + 1));
+        linkedSimplex.getNextLayer().set(createForLayer(layer + 1));
         return linkedSimplex;
     }
 }

@@ -16,27 +16,28 @@ public class LinkedSimplex<T extends MultiPoint<T>> {
     static final int DIMENSIONS = 2;
     public static final int LAYERS = 3;
     private List<AtomicReference<LinkedSimplex<T>>> neighbours;
-    private LinkedSimplex<T> nextLayer;
+    private AtomicReference<LinkedSimplex<T>>  nextLayer = new AtomicReference<>();
     private Collection<T> boundaries;
     private T value;
     private Splitter<T> splitter;
     private AtomicInteger lock = new AtomicInteger(0);
-    private AtomicReference<LinkedSimplex<T>> prevLayer = new AtomicReference<>();
+    private AtomicReference<LinkedSimplex<T>> self = new AtomicReference<>();
     private List<AtomicReference<LinkedSimplex<T>>> fromNeighbours = new ArrayList<>(DIMENSIONS + 1);
 
-    public LinkedSimplex(Collection<AtomicReference<LinkedSimplex<T>>> neighbours, LinkedSimplex<T> nextLayer, Collection<T> boundaries, T value, Splitter<T> splitter) {
+    public LinkedSimplex(Collection<AtomicReference<LinkedSimplex<T>>> neighbours, AtomicReference<LinkedSimplex<T>>  nextLayer, Collection<T> boundaries, T value, Splitter<T> splitter) {
         this.neighbours = new ArrayList<>();
         this.nextLayer = nextLayer;
         this.boundaries = Collections.unmodifiableCollection(boundaries);
         this.value = value;
         this.splitter = splitter;
+        self.set(this);
     }
 
-    public LinkedSimplex<T> split(T point, LinkedSimplex<T> next, Splitter<T> splitter) {
+    public AtomicReference<LinkedSimplex<T>> split(T point, AtomicReference<LinkedSimplex<T>>  next, Splitter<T> splitter) {
         return splitter.split(point, next, this);
     }
 
-    LinkedSimplex<T> search(T point, int layer) {
+    AtomicReference<LinkedSimplex<T>>  search(T point, int layer) {
         return search(point, layer, (x, y) -> y, x -> x);
     }
 
@@ -44,44 +45,44 @@ public class LinkedSimplex<T extends MultiPoint<T>> {
         D apply(A a, B b, C c);
     }
 
-    LinkedSimplex<T> search(T point, int layer,
-                            BiFunction<LinkedSimplex<T>, LinkedSimplex<T>, LinkedSimplex<T>> processor,
-                            Function<LinkedSimplex<T>, LinkedSimplex<T>> finalProcesor) {
+    AtomicReference<LinkedSimplex<T>>  search(T point, int layer,
+                            BiFunction<LinkedSimplex<T>, AtomicReference<LinkedSimplex<T>> , AtomicReference<LinkedSimplex<T>> > processor,
+                            Function<AtomicReference<LinkedSimplex<T>> , AtomicReference<LinkedSimplex<T>> > finalProcesor) {
         if (point.inSimplex(this.getBoundaries())) {
             if (layer < LAYERS - 1) {
                 try {
-                    return processor.apply(this, nextLayer.search(point, layer + 1, processor, finalProcesor));
+                    return processor.apply(this, nextLayer.get().search(point, layer + 1, processor, finalProcesor));
                 } catch (RuntimeException e) {
                     throw new RuntimeException(e);
                 }
             } else {
-                return finalProcesor.apply(this);
+                return finalProcesor.apply(this.getSelf());
             }
         } else {
             return point.bestNeighbour(this).map(s -> s.get().search(point, layer, processor, finalProcesor)).orElse(null);
         }
     }
 
-    LinkedSimplex<T> insert(T point) {
+    AtomicReference<LinkedSimplex<T>>  insert(T point) {
         AtomicBoolean grow = new AtomicBoolean(true);
         return search(point, 0,
                 (currentSimplex, lowerSimplex) -> currentSimplex.splitUpperLevelSimplex(point, lowerSimplex, grow),
-                currentSimplex -> currentSimplex.splitBase(point, null, grow));
+                currentSimplex -> currentSimplex.get().splitBase(point, null, grow));
     }
 
     protected static <E extends MultiPoint<E>> LinkedSimplex<E> newInstance(List<E> border, Splitter<E> splitter) {
-        return new LinkedSimplex<E>(null, null, new ArrayList<>(border), null, splitter);
+        return new LinkedSimplex<E>(null, new AtomicReference<>(), new ArrayList<>(border), null, splitter);
     }
 
     public List<AtomicReference<LinkedSimplex<T>>> getNeighbours() {
         return neighbours;
     }
 
-    public LinkedSimplex<T> getNextLayer() {
+    public AtomicReference<LinkedSimplex<T>>  getNextLayer() {
         return nextLayer;
     }
 
-    public void setNextLayer(LinkedSimplex<T> nextLayer) {
+    public void setNextLayer(AtomicReference<LinkedSimplex<T>>  nextLayer) {
         this.nextLayer = nextLayer;
     }
 
@@ -108,27 +109,27 @@ public class LinkedSimplex<T extends MultiPoint<T>> {
                 .findFirst();
     }
 
-    private LinkedSimplex<T> splitUpperLevelSimplex(T point, LinkedSimplex<T> newSimplex, AtomicBoolean grow) {
+    private AtomicReference<LinkedSimplex<T>>  splitUpperLevelSimplex(T point, AtomicReference<LinkedSimplex<T>>  newSimplex, AtomicBoolean grow) {
         if (grow.get() && new Random().nextBoolean()) {
             return split(point, newSimplex, splitter);
         }
-        this.setNextLayer(newSimplex.search(point.getSimplexMedian(this), LAYERS));
+        this.setNextLayer(newSimplex.get().search(point.getSimplexMedian(this), LAYERS));
         grow.set(false);
-        return this;
+        return this.getSelf();
     }
 
-    private LinkedSimplex<T> splitBase(T point, LinkedSimplex<T> newSimplex, AtomicBoolean grow) {
+    private AtomicReference<LinkedSimplex<T>>  splitBase(T point, AtomicReference<LinkedSimplex<T>>  newSimplex, AtomicBoolean grow) {
         if (getValue() == null) {
             setValue(point);
             grow.set(false);
             System.out.println("found empty" + this);
-            return this; //or it's better to return this?
+            return this.getSelf(); //or it's better to return this?
         }
 
         if (getValue().equals(point)) {
             grow.set(false);
             System.out.println("found same");
-            return this;
+            return this.getSelf();
         }
         return split(point, newSimplex, splitter);
     }
@@ -139,5 +140,13 @@ public class LinkedSimplex<T extends MultiPoint<T>> {
 
     public AtomicInteger getLock() {
         return lock;
+    }
+
+    public AtomicReference<LinkedSimplex<T>> getSelf() {
+        return self;
+    }
+
+    public void setSelf(AtomicReference<LinkedSimplex<T>> self) {
+        this.self = self;
     }
 }

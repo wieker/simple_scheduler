@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 public class SimplexLinkedGraphTwoReal extends LinkedSimplex<MultiPointImplTwo> {
-    public SimplexLinkedGraphTwoReal(Collection<AtomicReference<LinkedSimplex<MultiPointImplTwo>>> neighbours, LinkedSimplex<MultiPointImplTwo> nextLayer, Collection<MultiPointImplTwo> boundaries, MultiPointImplTwo value) {
+    public SimplexLinkedGraphTwoReal(Collection<AtomicReference<LinkedSimplex<MultiPointImplTwo>>> neighbours, AtomicReference<LinkedSimplex<MultiPointImplTwo>>  nextLayer, Collection<MultiPointImplTwo> boundaries, MultiPointImplTwo value) {
         super(neighbours, nextLayer, boundaries, value, new Splitter<>());
     }
 
@@ -23,16 +23,16 @@ public class SimplexLinkedGraphTwoReal extends LinkedSimplex<MultiPointImplTwo> 
 
         for (int i = 1; i < 100; i ++) {
             for (int j = 1; j < 100 - i; j ++) {
-                linkedSimplex = linkedSimplex.insert(MultiPointImplTwo.cmp(i, j));
+                linkedSimplex = linkedSimplex.insert(MultiPointImplTwo.cmp(i, j)).get();
             }
         }
 
         System.out.println("level 0");
-        print(linkedSimplex.search(MultiPointImplTwo.cmp(1, 1), 0), new HashSet<>());
+        print(linkedSimplex.search(MultiPointImplTwo.cmp(1, 1), 0).get(), new HashSet<>());
         System.out.println("level 1");
-        print(linkedSimplex.search(MultiPointImplTwo.cmp(1, 1), 1), new HashSet<>());
+        print(linkedSimplex.search(MultiPointImplTwo.cmp(1, 1), 1).get(), new HashSet<>());
         System.out.println("level 2");
-        print(linkedSimplex.search(MultiPointImplTwo.cmp(1, 1), 2), new HashSet<>());
+        print(linkedSimplex.search(MultiPointImplTwo.cmp(1, 1), 2).get(), new HashSet<>());
     }
 
     private static void print(LinkedSimplex<MultiPointImplTwo> linkedSimplex, Set<LinkedSimplex<MultiPointImplTwo>> e) {
@@ -49,10 +49,13 @@ public class SimplexLinkedGraphTwoReal extends LinkedSimplex<MultiPointImplTwo> 
         if (layer == LAYERS) {
             return null;
         }
-        LinkedSimplex<MultiPointImplTwo> linkedSimplex = new SimplexLinkedGraphTwoReal(null, null, new ArrayList<>(), null);
+        LinkedSimplex<MultiPointImplTwo> linkedSimplex = new SimplexLinkedGraphTwoReal(null, new AtomicReference<>(), new ArrayList<>(), null);
         linkedSimplex.setValue(MultiPointImplTwo.cmp(30, 30));
         linkedSimplex.setBoundaries(Arrays.asList(MultiPointImplTwo.cmp(0, 100), MultiPointImplTwo.cmp(0, 0), MultiPointImplTwo.cmp(100, 0)));
-        linkedSimplex.setNextLayer(createForLayer(layer + 1));
+        LinkedSimplex<MultiPointImplTwo> forLayer = createForLayer(layer + 1);
+        if (forLayer != null) {
+            linkedSimplex.getNextLayer().set(forLayer);
+        }
         return linkedSimplex;
     }
 }
