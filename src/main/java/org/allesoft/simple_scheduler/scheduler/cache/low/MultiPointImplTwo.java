@@ -1,9 +1,12 @@
 package org.allesoft.simple_scheduler.scheduler.cache.low;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 
 public class MultiPointImplTwo extends MultiPoint<MultiPointImplTwo> {
     final private double x;
@@ -75,6 +78,25 @@ public class MultiPointImplTwo extends MultiPoint<MultiPointImplTwo> {
         }
     }
 
+    public boolean collinear(MultiPointImplTwo a, MultiPointImplTwo b, MultiPointImplTwo c) {
+        return collinear(a.getX(), a.getY(), b.getX(), b.getY(), c.getX(), c.getY());
+    }
+
+    public boolean collinear(double x1, double y1, double x2,
+                             double y2, double x3, double y3)
+    {
+        // Calculation the area of
+        // triangle. We have skipped
+        // multiplication with 0.5
+        // to avoid floating point
+        // computations
+        double a = x1 * (y2 - y3) +
+                x2 * (y3 - y1) +
+                x3 * (y1 - y2);
+
+        return a == 0;
+    }
+
     @Override
     public boolean inSimplex(Collection<MultiPointImplTwo> boundaries) {
         MultiPointImplTwo point = (MultiPointImplTwo) this;
@@ -120,8 +142,52 @@ public class MultiPointImplTwo extends MultiPoint<MultiPointImplTwo> {
     }
 
     @Override
-    public MultiPointImplTwo median(MultiPointImplTwo a, MultiPointImplTwo b, LinkedSimplex<MultiPointImplTwo> simplex) {
-        return stdMedian(a, b);
+    public MultiPointImplTwo median(MultiPointImplTwo a, MultiPointImplTwo b, LinkedSimplex<MultiPointImplTwo> simplex, Splitter<MultiPointImplTwo> splitter) {
+        ArrayList<MultiPointImplTwo> boundary = new ArrayList<>(simplex.getBoundaries());
+        for (int i = 0; i < boundary.size(); i ++) {
+            MultiPointImplTwo z = boundary.get(i);
+            if (collinear(a, b, z)) {
+                System.out.println("collinear exception " + a + " " + b + " " + z);
+            }
+        }
+        for (int i = 0; i < boundary.size(); i ++) {
+            MultiPointImplTwo z = boundary.get(i);
+            for (int j = i + 1; j < boundary.size(); j ++) {
+                MultiPointImplTwo y = boundary.get(j);
+                if (collinear(a, y, z)) {
+                    return handle(a, z, y);
+                }
+            }
+        }
+        for (int i = 0; i < boundary.size(); i ++) {
+            MultiPointImplTwo z = boundary.get(i);
+            for (int j = i + 1; j < boundary.size(); j ++) {
+                MultiPointImplTwo y = boundary.get(j);
+                if (collinear(b, y, z)) {
+                    handle(y, z, b);
+                }
+            }
+        }
+        MultiPointImplTwo stdMedian = stdMedian(a, b);
+        for (int i = 0; i < boundary.size(); i ++) {
+            MultiPointImplTwo z = boundary.get(i);
+            while (collinear(stdMedian, b, z)) {
+                Random random = new Random();
+                stdMedian = cmp(stdMedian.getX() + ((double)random.nextInt(100)) / 100_000, stdMedian.getY() + ((double)random.nextInt(100)) / 100_000);
+            }
+        }
+        for (int i = 0; i < boundary.size(); i ++) {
+            MultiPointImplTwo z = boundary.get(i);
+            if (collinear(a, stdMedian, z)) {
+                Random random = new Random();
+                stdMedian = cmp(stdMedian.getX() + ((double)random.nextInt(100)) / 100_000, stdMedian.getY() + ((double)random.nextInt(100)) / 100_000);
+            }
+        }
+        return stdMedian;
+    }
+
+    public MultiPointImplTwo handle(MultiPointImplTwo a, MultiPointImplTwo z, MultiPointImplTwo y) {
+        throw new RuntimeException("collinear exception " + a + " " + y + " " + z);
     }
 
     public MultiPointImplTwo stdMedian(MultiPointImplTwo a, MultiPointImplTwo b) {

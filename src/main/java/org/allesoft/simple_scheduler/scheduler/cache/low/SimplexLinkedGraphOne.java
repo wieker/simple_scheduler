@@ -5,9 +5,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class SimplexLinkedGraphOne extends LinkedSimplex<MultiPointImplOne> {
-    public SimplexLinkedGraphOne(Collection<LinkedSimplex<MultiPointImplOne>> neighbours, LinkedSimplex<MultiPointImplOne> nextLayer, Collection<MultiPointImplOne> boundaries, MultiPointImplOne value) {
+    public SimplexLinkedGraphOne(Collection<AtomicReference<LinkedSimplex<MultiPointImplOne>>> neighbours, LinkedSimplex<MultiPointImplOne> nextLayer, Collection<MultiPointImplOne> boundaries, MultiPointImplOne value) {
         super(neighbours, nextLayer, boundaries, value, new Splitter<>());
     }
 

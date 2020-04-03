@@ -17,7 +17,7 @@ public class Splitter<T extends MultiPoint<T>> {
         // 3. value
         // 4. nei border - read only
         // 5. nei neighs - replace only
-        T median = point.median(point, simplex.getValue(), simplex);
+        T median = point.median(point, simplex.getValue(), simplex, this);
 
         List<T> oldBorder = oldBorders(simplex);
         List<List<T>> oldNeighBorders = getOldNeighBorders(oldBorder);
@@ -31,7 +31,13 @@ public class Splitter<T extends MultiPoint<T>> {
 
         adjustNeighbours(simplex, orderedOldNeighbours, newSimplexes);
 
-        return newSimplexes.get(0);
+        return newSimplexes.stream().filter(s -> s.getNextLayer() == next).findFirst().orElse(null);
+    }
+
+    public List<List<T>> tryBorders(T median, LinkedSimplex<T> simplex) {
+        List<T> oldBorder = oldBorders(simplex);
+        List<List<T>> oldNeighBorders = getOldNeighBorders(oldBorder);
+        return newBorders(median, oldNeighBorders);
     }
 
     public List<T> oldBorders(LinkedSimplex<T> simplex) {

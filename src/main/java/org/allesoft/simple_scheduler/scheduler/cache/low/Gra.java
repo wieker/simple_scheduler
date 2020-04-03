@@ -40,7 +40,7 @@ public class Gra {
                     MultiPointImplTwo next = (MultiPointImplTwo) boundaries.get((i + 1) % size);
                     int centerY = getHeight() / 4;
                     int centerX = getWidth() / 4;
-                    double scale = 20;
+                    double scale = 5;
                     g.drawLine(centerX + (int) (curr.getX() * scale), centerY + (int) (curr.getY() * scale), centerX + (int) (next.getX() * scale), centerY + (int) (next.getY() * scale));
                 }
                 for (LinkedSimplex<MultiPointImplTwo> next : simplex.getNeighbours()) {
@@ -55,28 +55,28 @@ public class Gra {
             public void mouseClicked(MouseEvent e) {
                 int centerY = canvas.getHeight() / 4;
                 int centerX = canvas.getWidth() / 4;
-                double scale = 20;
+                double scale = 5;
                 simplex.set(simplex.get().insert(cmp((e.getX() - centerX) / scale, (e.getY() - centerY) / scale)));
                 canvas.repaint();
             }
         });
         window.add(canvas);
 
-//
-//        for (int i = 1; i < 100; i ++) {
-//            for (int j = 1; j < 100 - i; j ++) {
-//                try {
-//                    simplex.set(simplex.get().insert(MultiPointImplTwo.cmp(i, j)));
-//                } catch (NullPointerException e) {
-//
-//                }
-//                canvas.repaint();
-//                try {
-//                    Thread.sleep(10l << i);
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        }
+
+        for (int i = 1; i < 100; i += 10) {
+            for (int j = 1; j < 100 - i; j += 10) {
+                try {
+                    simplex.set(simplex.get().insert(MultiPointImplTwo.cmp(i, j)));
+                } catch (NullPointerException e) {
+
+                }
+                canvas.repaint();
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 }

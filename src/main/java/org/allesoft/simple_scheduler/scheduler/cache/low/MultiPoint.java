@@ -6,7 +6,7 @@ import java.util.Optional;
 public abstract class MultiPoint<T extends MultiPoint<T>> {
     public abstract Optional<LinkedSimplex<T>> bestNeighbour(LinkedSimplex<T> simplexLinkedGraphTwoReal);
 
-    public abstract T median(T a, T b, LinkedSimplex<T> simplex);
+    public abstract T median(T a, T b, LinkedSimplex<T> simplex, Splitter<T> splitter);
 
     public abstract boolean inSimplex(Collection<T> boundaries);
 }

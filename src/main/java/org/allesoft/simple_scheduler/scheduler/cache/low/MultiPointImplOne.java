@@ -47,7 +47,7 @@ public class MultiPointImplOne extends MultiPoint<MultiPointImplOne> {
     }
 
     @Override
-    public MultiPointImplOne median(MultiPointImplOne aPoint, MultiPointImplOne bPoint, LinkedSimplex<MultiPointImplOne> simplex) {
+    public MultiPointImplOne median(MultiPointImplOne aPoint, MultiPointImplOne bPoint, LinkedSimplex<MultiPointImplOne> simplex, Splitter<MultiPointImplOne> splitter) {
         MultiPointImplOne a = (MultiPointImplOne) aPoint;
         MultiPointImplOne b = (MultiPointImplOne) bPoint;
         return new MultiPointImplOne(Math.max(a.getPos(), b.getPos()));

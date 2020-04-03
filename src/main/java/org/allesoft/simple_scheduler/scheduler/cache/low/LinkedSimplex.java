@@ -14,18 +14,18 @@ import java.util.function.Function;
 
 public class LinkedSimplex<T extends MultiPoint<T>> {
     static final int DIMENSIONS = 2;
-    public static final int LAYERS = 1;
-    private Collection<LinkedSimplex<T>> neighbours = new ArrayList<>(DIMENSIONS + 1);
+    public static final int LAYERS = 3;
+    private List<AtomicReference<LinkedSimplex<T>>> neighbours = new ArrayList<>(DIMENSIONS + 1);
     private LinkedSimplex<T> nextLayer = null;
     private Collection<T> boundaries = new ArrayList<>(DIMENSIONS + 1);
     private T value;
     private Splitter<T> splitter;
     private AtomicInteger lock = new AtomicInteger(0);
     private AtomicReference<LinkedSimplex<T>> prevLayer = new AtomicReference<>();
-    private Collection<AtomicReference<LinkedSimplex<T>>> toNeighbours = new ArrayList<>(DIMENSIONS + 1);
+    private List<AtomicReference<LinkedSimplex<T>>> fromNeighbours = new ArrayList<>(DIMENSIONS + 1);
 
-    public LinkedSimplex(Collection<LinkedSimplex<T>> neighbours, LinkedSimplex<T> nextLayer, Collection<T> boundaries, T value, Splitter<T> splitter) {
-        this.neighbours = neighbours != null ? Collections.unmodifiableList(new ArrayList<>(neighbours)) : null;
+    public LinkedSimplex(Collection<AtomicReference<LinkedSimplex<T>>> neighbours, LinkedSimplex<T> nextLayer, Collection<T> boundaries, T value, Splitter<T> splitter) {
+        this.neighbours = neighbours != null ? Collections.unmodifiableList(new ArrayList<>(neighbours)) : new ArrayList<>();
         this.nextLayer = nextLayer;
         this.boundaries = Collections.unmodifiableCollection(boundaries);
         this.value = value;
@@ -69,22 +69,15 @@ public class LinkedSimplex<T extends MultiPoint<T>> {
         return new LinkedSimplex<E>(null, null, new ArrayList<>(border), null, splitter);
     }
 
-    public Collection<LinkedSimplex<T>> getNeighbours() {
+    public Collection<AtomicReference<LinkedSimplex<T>>> getNeighbours() {
         return Collections.unmodifiableCollection(neighbours);
     }
 
-    public void setNeighbours(Collection<LinkedSimplex<T>> neighbours) {
+    public void setNeighbours(Collection<AtomicReference<LinkedSimplex<T>>> neighbours) {
         this.neighbours = Collections.unmodifiableList(new ArrayList<>(neighbours));
         if (neighbours.size() > DIMENSIONS + 1) {
             throw new RuntimeException("too many neighbours");
         }
-    }
-
-    public void replaceNeighbour(LinkedSimplex<T> old, LinkedSimplex<T> newSimplex) {
-        List<LinkedSimplex<T>> newNeighbours = new ArrayList<>(neighbours);
-        newNeighbours.remove(old);
-        newNeighbours.add(newSimplex);
-        setNeighbours(newNeighbours);
     }
 
     public LinkedSimplex<T> getNextLayer() {
@@ -112,7 +105,7 @@ public class LinkedSimplex<T extends MultiPoint<T>> {
     }
 
     protected Optional<LinkedSimplex<T>> neighbourForThisHyperWall(List<T> border) {
-        return this.getNeighbours().stream()
+        return this.getNeighbours().stream().map(AtomicReference::get)
                 .filter(nei -> nei.getBoundaries().containsAll(border))
                 .findFirst();
     }
