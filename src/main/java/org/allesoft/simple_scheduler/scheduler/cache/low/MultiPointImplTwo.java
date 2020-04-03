@@ -194,4 +194,13 @@ public class MultiPointImplTwo extends MultiPoint<MultiPointImplTwo> {
     public MultiPointImplTwo stdMedian(MultiPointImplTwo a, MultiPointImplTwo b) {
         return MultiPointImplTwo.cmp((a.getX() + b.getX()) / 2, (a.getY() + b.getY()) / 2);
     }
+
+    public MultiPointImplTwo getSimplexMedian(LinkedSimplex<MultiPointImplTwo> simplex) {
+        Iterator<MultiPointImplTwo> iterator = simplex.getBoundaries().iterator();
+        MultiPointImplTwo a = iterator.next();
+        MultiPointImplTwo b = iterator.next();
+        MultiPointImplTwo c = iterator.next();
+        MultiPointImplTwo value = stdMedian(a, b);
+        return stdMedian(value, c);
+    }
 }

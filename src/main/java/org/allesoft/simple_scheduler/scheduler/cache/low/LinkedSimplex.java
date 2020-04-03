@@ -103,6 +103,7 @@ public class LinkedSimplex<T extends MultiPoint<T>> {
 
     protected Optional<AtomicReference<LinkedSimplex<T>>> neighbourForThisHyperWall(List<T> border) {
         return this.getNeighbours().stream()
+                .filter(nei -> nei != null && nei.get() != null)
                 .filter(nei -> nei.get().getBoundaries().containsAll(border))
                 .findFirst();
     }
@@ -111,6 +112,7 @@ public class LinkedSimplex<T extends MultiPoint<T>> {
         if (grow.get() && new Random().nextBoolean()) {
             return split(point, newSimplex, splitter);
         }
+        this.setNextLayer(newSimplex.search(point.getSimplexMedian(this), LAYERS));
         grow.set(false);
         return this;
     }

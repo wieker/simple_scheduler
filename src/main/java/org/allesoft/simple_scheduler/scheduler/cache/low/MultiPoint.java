@@ -10,4 +10,6 @@ public abstract class MultiPoint<T extends MultiPoint<T>> {
     public abstract T median(T a, T b, LinkedSimplex<T> simplex, Splitter<T> splitter);
 
     public abstract boolean inSimplex(Collection<T> boundaries);
+
+    public abstract T getSimplexMedian(LinkedSimplex<T> simplex);
 }

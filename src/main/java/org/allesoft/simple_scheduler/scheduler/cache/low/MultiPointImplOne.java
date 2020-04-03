@@ -53,4 +53,13 @@ public class MultiPointImplOne extends MultiPoint<MultiPointImplOne> {
         MultiPointImplOne b = (MultiPointImplOne) bPoint;
         return new MultiPointImplOne(Math.max(a.getPos(), b.getPos()));
     }
+
+    @Override
+    public MultiPointImplOne getSimplexMedian(LinkedSimplex<MultiPointImplOne> simplex) {
+        Iterator<MultiPointImplOne> iterator = simplex.getBoundaries().iterator();
+        MultiPointImplOne a = iterator.next();
+        MultiPointImplOne b = iterator.next();
+        MultiPointImplOne value = median(a, b, null, null);
+        return value;
+    }
 }
