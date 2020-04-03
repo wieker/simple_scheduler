@@ -62,21 +62,21 @@ public class Gra {
         });
         window.add(canvas);
 
-
-        for (int i = 1; i < 100; i ++) {
-            for (int j = 1; j < 100 - i; j ++) {
-                try {
-                    simplex.set(simplex.get().insert(MultiPointImplTwo.cmp(i, j)));
-                } catch (NullPointerException e) {
-
-                }
-                canvas.repaint();
-                try {
-                    Thread.sleep(10l << i);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
+//
+//        for (int i = 1; i < 100; i ++) {
+//            for (int j = 1; j < 100 - i; j ++) {
+//                try {
+//                    simplex.set(simplex.get().insert(MultiPointImplTwo.cmp(i, j)));
+//                } catch (NullPointerException e) {
+//
+//                }
+//                canvas.repaint();
+//                try {
+//                    Thread.sleep(10l << i);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        }
     }
 }

@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Optional;
-import java.util.Set;
 
 public class MultiPointImplTwo extends MultiPoint<MultiPointImplTwo> {
     final private double x;
@@ -38,45 +37,32 @@ public class MultiPointImplTwo extends MultiPoint<MultiPointImplTwo> {
     }
 
     @Override
-    public Optional<LinkedSimplex<MultiPointImplTwo>> bestNeighbour(Set<LinkedSimplex<MultiPointImplTwo>> visited, LinkedSimplex<MultiPointImplTwo> simplexLinkedGraphTwoReal) {
+    public Optional<LinkedSimplex<MultiPointImplTwo>> bestNeighbour(LinkedSimplex<MultiPointImplTwo> simplex) {
         MultiPointImplTwo point = this;
-        if (simplexLinkedGraphTwoReal.getBoundaries().size() < 3) {
+        if (simplex.getBoundaries().size() < 3) {
             throw new RuntimeException("wrong boundary");
         }
-        Iterator<MultiPointImplTwo> iterator = simplexLinkedGraphTwoReal.getBoundaries().iterator();
-        MultiPointImplTwo a = (MultiPointImplTwo) iterator.next();
-        MultiPointImplTwo b = ((MultiPointImplTwo)iterator.next());
-        MultiPointImplTwo c = ((MultiPointImplTwo)iterator.next());
-        MultiPointImplTwo value = simplexLinkedGraphTwoReal.getValue();
+        Iterator<MultiPointImplTwo> iterator = simplex.getBoundaries().iterator();
+        MultiPointImplTwo a = iterator.next();
+        MultiPointImplTwo b = iterator.next();
+        MultiPointImplTwo c = iterator.next();
+        MultiPointImplTwo value = simplex.getValue();
         if (value == null) {
-            value = (MultiPointImplTwo) median(a, b);
-            value = (MultiPointImplTwo) median(value, c);
+            value = stdMedian(a, b);
+            value = stdMedian(value, c);
         }
         boolean leftAB = isLeft(a, b, point) * isLeft(a, b, value) <= 0;
         boolean leftBC = isLeft(c, b, point) * isLeft(c, b, value) <= 0;
         boolean leftCA = isLeft(a, c, point) * isLeft(a, c, value) <= 0;
         if (leftAB) {
-            Optional<LinkedSimplex<MultiPointImplTwo>> linkedSimplex = simplexLinkedGraphTwoReal.neighbourForThisHyperWall(Arrays.asList(a, b));
-            if (!visited.contains(linkedSimplex.orElse(null))) {
-                return linkedSimplex;
-            }
-            System.out.println("cycle");
+            return simplex.neighbourForThisHyperWall(Arrays.asList(a, b));
         }
         if (leftBC) {
-            Optional<LinkedSimplex<MultiPointImplTwo>> linkedSimplex = simplexLinkedGraphTwoReal.neighbourForThisHyperWall(Arrays.asList(c, b));
-            if (!visited.contains(linkedSimplex.orElse(null))) {
-                return linkedSimplex;
-            }
-            System.out.println("cycle");
+            return simplex.neighbourForThisHyperWall(Arrays.asList(c, b));
         }
         if (leftCA) {
-            Optional<LinkedSimplex<MultiPointImplTwo>> linkedSimplex = simplexLinkedGraphTwoReal.neighbourForThisHyperWall(Arrays.asList(a, c));
-            if (!visited.contains(linkedSimplex.orElse(null))) {
-                return linkedSimplex;
-            }
-            System.out.println("cycle");
+            return simplex.neighbourForThisHyperWall(Arrays.asList(a, c));
         }
-        System.out.println("this");
         return Optional.empty();
     }
 
@@ -134,9 +120,11 @@ public class MultiPointImplTwo extends MultiPoint<MultiPointImplTwo> {
     }
 
     @Override
-    public MultiPointImplTwo median(MultiPointImplTwo aPoint, MultiPointImplTwo bPoint) {
-        MultiPointImplTwo a = (MultiPointImplTwo) aPoint;
-        MultiPointImplTwo b = (MultiPointImplTwo) bPoint;
+    public MultiPointImplTwo median(MultiPointImplTwo a, MultiPointImplTwo b, LinkedSimplex<MultiPointImplTwo> simplex) {
+        return stdMedian(a, b);
+    }
+
+    public MultiPointImplTwo stdMedian(MultiPointImplTwo a, MultiPointImplTwo b) {
         return MultiPointImplTwo.cmp((a.getX() + b.getX()) / 2, (a.getY() + b.getY()) / 2);
     }
 }

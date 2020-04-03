@@ -3,11 +3,9 @@ package org.allesoft.simple_scheduler.scheduler.cache.low;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -34,18 +32,16 @@ public class LinkedSimplex<T extends MultiPoint<T>> {
     }
 
     LinkedSimplex<T> search(T point, int layer) {
-        return search(point, layer, (x, y) -> y, x -> x, new HashSet<LinkedSimplex<T>>());
+        return search(point, layer, (x, y) -> y, x -> x);
     }
 
     LinkedSimplex<T> search(T point, int layer,
-                         BiFunction<LinkedSimplex<T>, LinkedSimplex<T>, LinkedSimplex<T>> processor,
-                         Function<LinkedSimplex<T>, LinkedSimplex<T>> finalProcesor, Set<LinkedSimplex<T>> visited) {
-        System.out.println("enter " + this);
-        visited.add(this);
+                            BiFunction<LinkedSimplex<T>, LinkedSimplex<T>, LinkedSimplex<T>> processor,
+                            Function<LinkedSimplex<T>, LinkedSimplex<T>> finalProcesor) {
         if (point.inSimplex(this.getBoundaries())) {
             if (layer < LAYERS - 1) {
                 try {
-                    return processor.apply(this, nextLayer.search(point, layer + 1, processor, finalProcesor, visited));
+                    return processor.apply(this, nextLayer.search(point, layer + 1, processor, finalProcesor));
                 } catch (RuntimeException e) {
                     throw new RuntimeException(e);
                 }
@@ -53,16 +49,15 @@ public class LinkedSimplex<T extends MultiPoint<T>> {
                 return finalProcesor.apply(this);
             }
         } else {
-            return point.bestNeighbour(visited, this).map(s -> s.search(point, layer, processor, finalProcesor, visited)).orElse(null);
+            return point.bestNeighbour(this).map(s -> s.search(point, layer, processor, finalProcesor)).orElse(null);
         }
     }
 
     LinkedSimplex<T> insert(T point) {
         AtomicBoolean grow = new AtomicBoolean(true);
-        System.out.println("insert enter " + point);
         return search(point, 0,
                 (currentSimplex, lowerSimplex) -> currentSimplex.splitUpperLevelSimplex(point, lowerSimplex, grow),
-                currentSimplex -> currentSimplex.splitBase(point, null, grow), new HashSet<LinkedSimplex<T>>());
+                currentSimplex -> currentSimplex.splitBase(point, null, grow));
     }
 
     protected static <E extends MultiPoint<E>> LinkedSimplex<E> newInstance(List<E> border, Splitter<E> splitter) {
@@ -81,17 +76,9 @@ public class LinkedSimplex<T extends MultiPoint<T>> {
     }
 
     public void replaceNeighbour(LinkedSimplex<T> old, LinkedSimplex<T> newSimplex) {
-        System.out.println("replace " + old + " => " + newSimplex);
         List<LinkedSimplex<T>> newNeighbours = new ArrayList<>(neighbours);
-        int size = newNeighbours.size();
         newNeighbours.remove(old);
-        if (size == newNeighbours.size()) {
-            throw new RuntimeException("miss neighbours " + this + old + newSimplex);
-        }
         newNeighbours.add(newSimplex);
-        if (newNeighbours.size() > DIMENSIONS + 1) {
-            throw new RuntimeException("too many neighbours");
-        }
         setNeighbours(newNeighbours);
     }
 
@@ -120,15 +107,9 @@ public class LinkedSimplex<T extends MultiPoint<T>> {
     }
 
     protected Optional<LinkedSimplex<T>> neighbourForThisHyperWall(List<T> border) {
-        Optional<LinkedSimplex<T>> first = this.getNeighbours().stream()
+        return this.getNeighbours().stream()
                 .filter(nei -> nei.getBoundaries().containsAll(border))
                 .findFirst();
-        if (!first.isPresent()) {
-            for (T point : border) {
-                System.out.println(point);
-            }
-        }
-        return first;
     }
 
     private LinkedSimplex<T> splitUpperLevelSimplex(T point, LinkedSimplex<T> newSimplex, AtomicBoolean grow) {
