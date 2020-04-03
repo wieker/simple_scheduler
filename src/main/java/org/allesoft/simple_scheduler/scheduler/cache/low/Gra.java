@@ -43,9 +43,9 @@ public class Gra {
                     double scale = 5;
                     g.drawLine(centerX + (int) (curr.getX() * scale), centerY + (int) (curr.getY() * scale), centerX + (int) (next.getX() * scale), centerY + (int) (next.getY() * scale));
                 }
-                for (LinkedSimplex<MultiPointImplTwo> next : simplex.getNeighbours()) {
+                for (AtomicReference<LinkedSimplex<MultiPointImplTwo>> next : simplex.getNeighbours()) {
                     if (!passed.contains(next)) {
-                        draw(g, next, passed);
+                        draw(g, next.get(), passed);
                     }
                 }
             }

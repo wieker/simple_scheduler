@@ -38,9 +38,9 @@ public class SimplexLinkedGraphTwoReal extends LinkedSimplex<MultiPointImplTwo> 
     private static void print(LinkedSimplex<MultiPointImplTwo> linkedSimplex, Set<LinkedSimplex<MultiPointImplTwo>> e) {
         System.out.println(linkedSimplex);
         e.add(linkedSimplex);
-        for (LinkedSimplex<MultiPointImplTwo> simplex : linkedSimplex.getNeighbours()) {
+        for (AtomicReference<LinkedSimplex<MultiPointImplTwo>> simplex : linkedSimplex.getNeighbours()) {
             if (!e.contains(simplex)) {
-                print(simplex, e);
+                print(simplex.get(), e);
             }
         }
     }
@@ -49,7 +49,7 @@ public class SimplexLinkedGraphTwoReal extends LinkedSimplex<MultiPointImplTwo> 
         if (layer == LAYERS) {
             return null;
         }
-        LinkedSimplex<MultiPointImplTwo> linkedSimplex = new SimplexLinkedGraphTwoReal(new ArrayList<>(), null, new ArrayList<>(), null);
+        LinkedSimplex<MultiPointImplTwo> linkedSimplex = new SimplexLinkedGraphTwoReal(null, null, new ArrayList<>(), null);
         linkedSimplex.setValue(MultiPointImplTwo.cmp(30, 30));
         linkedSimplex.setBoundaries(Arrays.asList(MultiPointImplTwo.cmp(0, 100), MultiPointImplTwo.cmp(0, 0), MultiPointImplTwo.cmp(100, 0)));
         linkedSimplex.setNextLayer(createForLayer(layer + 1));

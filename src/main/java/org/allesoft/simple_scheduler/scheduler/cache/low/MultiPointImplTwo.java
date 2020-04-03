@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class MultiPointImplTwo extends MultiPoint<MultiPointImplTwo> {
     final private double x;
@@ -40,7 +41,7 @@ public class MultiPointImplTwo extends MultiPoint<MultiPointImplTwo> {
     }
 
     @Override
-    public Optional<LinkedSimplex<MultiPointImplTwo>> bestNeighbour(LinkedSimplex<MultiPointImplTwo> simplex) {
+    public Optional<AtomicReference<LinkedSimplex<MultiPointImplTwo>>> bestNeighbour(LinkedSimplex<MultiPointImplTwo> simplex) {
         MultiPointImplTwo point = this;
         if (simplex.getBoundaries().size() < 3) {
             throw new RuntimeException("wrong boundary");

@@ -1,5 +1,6 @@
 package org.allesoft.simple_scheduler.scheduler.cache.low;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -21,15 +22,56 @@ public class Splitter<T extends MultiPoint<T>> {
 
         List<T> oldBorder = oldBorders(simplex);
         List<List<T>> oldNeighBorders = getOldNeighBorders(oldBorder);
-        List<Optional<LinkedSimplex<T>>> orderedOldNeighbours = orderedOldNeighbours(simplex, oldNeighBorders);
+        List<Optional<AtomicReference<LinkedSimplex<T>>>> orderedOldNeighbours = orderedOldNeighbours(simplex, oldNeighBorders);
+        ArrayList<AtomicReference<LinkedSimplex<T>>> fromLinks = new ArrayList<>();
+        for (int j = 0; j < orderedOldNeighbours.size(); j ++) {
+            AtomicReference<LinkedSimplex<T>> element = null;
+            Optional<AtomicReference<LinkedSimplex<T>>> linkedSimplexAtomicReference = orderedOldNeighbours.get(j);
+            if (!linkedSimplexAtomicReference.isPresent()) {
+                fromLinks.add(null);
+            } else {
+                for (int i = 0; i < simplex.getNeighbours().size(); i++) {
+                    if (linkedSimplexAtomicReference.get() == simplex.getNeighbours().get(i)) {
+                        element = simplex.getFromNeighbours().get(i);
+                    }
+                }
+                fromLinks.add(element);
+            }
+        }
         List<List<T>> newBorders = newBorders(median, oldNeighBorders);
         List<T> newValues = newValues(point, simplex, newBorders);
         List<LinkedSimplex<T>> newNexts = newNexts(point, next, simplex, newBorders);
         List<LinkedSimplex<T>> newSimplexes = newSimplexes(newBorders, newValues, newNexts);
-        List<List<LinkedSimplex<T>>> newNeighbours = newNeighbours(orderedOldNeighbours, newSimplexes);
-        setNeighbours(newSimplexes, newNeighbours);
 
-        adjustNeighbours(simplex, orderedOldNeighbours, newSimplexes);
+        for (int i = 0; i < newSimplexes.size(); i ++) {
+            for (int j = i + 1; j < newSimplexes.size(); j ++) {
+                AtomicReference<LinkedSimplex<T>> refToI = new AtomicReference<>(newSimplexes.get(i));
+                AtomicReference<LinkedSimplex<T>> refToJ = new AtomicReference<>(newSimplexes.get(j));
+                newSimplexes.get(i).getNeighbours().add(refToJ);
+                newSimplexes.get(i).getFromNeighbours().add(refToI);
+                newSimplexes.get(j).getNeighbours().add(refToI);
+                newSimplexes.get(j).getFromNeighbours().add(refToJ);
+            }
+            newSimplexes.get(i).getNeighbours().add(orderedOldNeighbours.get(i).orElse(null));
+            newSimplexes.get(i).getFromNeighbours().add(fromLinks.get(i));
+        }
+
+        for (int i = 0; i < newSimplexes.size(); i ++) {
+            newSimplexes.get(i).getLock().set(1);
+        }
+        if (simplex.getLock().getAndSet(1) == 1) {
+            throw new RuntimeException("retry");
+        }
+
+        for (int i = 0; i < fromLinks.size(); i ++) {
+            if (fromLinks.get(i) != null) {
+                fromLinks.get(i).set(newSimplexes.get(i));
+            }
+        }
+
+        for (int i = 0; i < newSimplexes.size(); i ++) {
+            newSimplexes.get(i).getLock().set(0);
+        }
 
         return newSimplexes.stream().filter(s -> s.getNextLayer() == next).findFirst().orElse(null);
     }
@@ -42,20 +84,6 @@ public class Splitter<T extends MultiPoint<T>> {
 
     public List<T> oldBorders(LinkedSimplex<T> simplex) {
         return Collections.unmodifiableList(new ArrayList<>(simplex.getBoundaries()));
-    }
-
-    public void adjustNeighbours(LinkedSimplex<T> simplex, List<Optional<LinkedSimplex<T>>> orderedOldNeighbours, List<LinkedSimplex<T>> newSimplexes) {
-        for (int i = 0; i < orderedOldNeighbours.size(); i ++) {
-            if (orderedOldNeighbours.get(i).isPresent()) {
-                orderedOldNeighbours.get(i).get().replaceNeighbour(simplex, newSimplexes.get(i));
-            }
-        }
-    }
-
-    public void setNeighbours(List<LinkedSimplex<T>> newSimplexes, List<List<LinkedSimplex<T>>> newNeighbours) {
-        for (int i = 0; i < newSimplexes.size(); i ++) {
-            newSimplexes.get(i).setNeighbours(newNeighbours.get(i));
-        }
     }
 
     public List<List<LinkedSimplex<T>>> newNeighbours(List<Optional<LinkedSimplex<T>>> orderedOldNeighbours, List<LinkedSimplex<T>> newSimplexes) {
@@ -106,7 +134,7 @@ public class Splitter<T extends MultiPoint<T>> {
             }).collect(Collectors.toList());
     }
 
-    public List<Optional<LinkedSimplex<T>>> orderedOldNeighbours(LinkedSimplex<T> simplex, List<List<T>> oldNeighBorders) {
+    public List<Optional<AtomicReference<LinkedSimplex<T>>>> orderedOldNeighbours(LinkedSimplex<T> simplex, List<List<T>> oldNeighBorders) {
         return oldNeighBorders.stream().map(simplex::neighbourForThisHyperWall).collect(Collectors.toList());
     }
 

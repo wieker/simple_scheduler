@@ -39,9 +39,9 @@ public class SimplexLinkedGraphOne extends LinkedSimplex<MultiPointImplOne> {
     private static void print(LinkedSimplex<MultiPointImplOne> linkedSimplex, Set<LinkedSimplex<MultiPointImplOne>> e) {
         System.out.println(linkedSimplex);
         e.add(linkedSimplex);
-        for (LinkedSimplex<MultiPointImplOne> simplex : linkedSimplex.getNeighbours()) {
+        for (AtomicReference<LinkedSimplex<MultiPointImplOne>> simplex : linkedSimplex.getNeighbours()) {
             if (!e.contains(simplex)) {
-                print(simplex, e);
+                print(simplex.get(), e);
             }
         }
     }
@@ -50,7 +50,7 @@ public class SimplexLinkedGraphOne extends LinkedSimplex<MultiPointImplOne> {
         if (layer == LAYERS) {
             return null;
         }
-        LinkedSimplex<MultiPointImplOne> linkedSimplex = new SimplexLinkedGraphOne(new ArrayList<>(), null, new ArrayList<>(), null);
+        LinkedSimplex<MultiPointImplOne> linkedSimplex = new SimplexLinkedGraphOne(null, null, new ArrayList<>(), null);
         linkedSimplex.setValue(new MultiPointImplOne(10));
         linkedSimplex.setBoundaries(Arrays.asList(new MultiPointImplOne(0), new MultiPointImplOne(100)));
         linkedSimplex.setNextLayer(createForLayer(layer + 1));

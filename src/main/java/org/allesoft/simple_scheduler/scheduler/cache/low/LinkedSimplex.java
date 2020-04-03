@@ -15,9 +15,9 @@ import java.util.function.Function;
 public class LinkedSimplex<T extends MultiPoint<T>> {
     static final int DIMENSIONS = 2;
     public static final int LAYERS = 3;
-    private List<AtomicReference<LinkedSimplex<T>>> neighbours = new ArrayList<>(DIMENSIONS + 1);
-    private LinkedSimplex<T> nextLayer = null;
-    private Collection<T> boundaries = new ArrayList<>(DIMENSIONS + 1);
+    private List<AtomicReference<LinkedSimplex<T>>> neighbours;
+    private LinkedSimplex<T> nextLayer;
+    private Collection<T> boundaries;
     private T value;
     private Splitter<T> splitter;
     private AtomicInteger lock = new AtomicInteger(0);
@@ -25,7 +25,7 @@ public class LinkedSimplex<T extends MultiPoint<T>> {
     private List<AtomicReference<LinkedSimplex<T>>> fromNeighbours = new ArrayList<>(DIMENSIONS + 1);
 
     public LinkedSimplex(Collection<AtomicReference<LinkedSimplex<T>>> neighbours, LinkedSimplex<T> nextLayer, Collection<T> boundaries, T value, Splitter<T> splitter) {
-        this.neighbours = neighbours != null ? Collections.unmodifiableList(new ArrayList<>(neighbours)) : new ArrayList<>();
+        this.neighbours = new ArrayList<>();
         this.nextLayer = nextLayer;
         this.boundaries = Collections.unmodifiableCollection(boundaries);
         this.value = value;
@@ -38,6 +38,10 @@ public class LinkedSimplex<T extends MultiPoint<T>> {
 
     LinkedSimplex<T> search(T point, int layer) {
         return search(point, layer, (x, y) -> y, x -> x);
+    }
+
+    interface TriFunction<A, B, C, D> {
+        D apply(A a, B b, C c);
     }
 
     LinkedSimplex<T> search(T point, int layer,
@@ -54,7 +58,7 @@ public class LinkedSimplex<T extends MultiPoint<T>> {
                 return finalProcesor.apply(this);
             }
         } else {
-            return point.bestNeighbour(this).map(s -> s.search(point, layer, processor, finalProcesor)).orElse(null);
+            return point.bestNeighbour(this).map(s -> s.get().search(point, layer, processor, finalProcesor)).orElse(null);
         }
     }
 
@@ -69,15 +73,8 @@ public class LinkedSimplex<T extends MultiPoint<T>> {
         return new LinkedSimplex<E>(null, null, new ArrayList<>(border), null, splitter);
     }
 
-    public Collection<AtomicReference<LinkedSimplex<T>>> getNeighbours() {
-        return Collections.unmodifiableCollection(neighbours);
-    }
-
-    public void setNeighbours(Collection<AtomicReference<LinkedSimplex<T>>> neighbours) {
-        this.neighbours = Collections.unmodifiableList(new ArrayList<>(neighbours));
-        if (neighbours.size() > DIMENSIONS + 1) {
-            throw new RuntimeException("too many neighbours");
-        }
+    public List<AtomicReference<LinkedSimplex<T>>> getNeighbours() {
+        return neighbours;
     }
 
     public LinkedSimplex<T> getNextLayer() {
@@ -104,9 +101,9 @@ public class LinkedSimplex<T extends MultiPoint<T>> {
         this.value = value;
     }
 
-    protected Optional<LinkedSimplex<T>> neighbourForThisHyperWall(List<T> border) {
-        return this.getNeighbours().stream().map(AtomicReference::get)
-                .filter(nei -> nei.getBoundaries().containsAll(border))
+    protected Optional<AtomicReference<LinkedSimplex<T>>> neighbourForThisHyperWall(List<T> border) {
+        return this.getNeighbours().stream()
+                .filter(nei -> nei.get().getBoundaries().containsAll(border))
                 .findFirst();
     }
 
@@ -132,5 +129,13 @@ public class LinkedSimplex<T extends MultiPoint<T>> {
             return this;
         }
         return split(point, newSimplex, splitter);
+    }
+
+    public List<AtomicReference<LinkedSimplex<T>>> getFromNeighbours() {
+        return fromNeighbours;
+    }
+
+    public AtomicInteger getLock() {
+        return lock;
     }
 }
