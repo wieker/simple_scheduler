@@ -18,7 +18,7 @@ public class LinkedSimplex<T extends MultiPoint<T>> {
     private List<AtomicReference<LinkedSimplex<T>>> neighbours;
     private AtomicReference<LinkedSimplex<T>>  nextLayer = new AtomicReference<>();
     private Collection<T> boundaries;
-    private T value;
+    private volatile T value;
     private Splitter<T> splitter;
     private AtomicInteger lock = new AtomicInteger(0);
     private AtomicReference<LinkedSimplex<T>> self = new AtomicReference<>();

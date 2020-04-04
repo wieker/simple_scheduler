@@ -45,12 +45,6 @@ public class Splitter<T extends MultiPoint<T>> {
         List<List<T>> newBorders = newBorders(median, oldNeighBorders);
         List<T> newValues = newValues(point, simplex, newBorders);
         List<LinkedSimplex<T>> newSimplexes = newSimplexes(newBorders, newValues);
-        for (LinkedSimplex<T> s : newSimplexes) {
-            if (s.getValue() != null && simplexValue.equals(s.getValue())) {
-                s.setSelf(simplex.getSelf());
-                s.getSelf().set(s);
-            }
-        }
         newNexts(newSimplexes, next, point);
 
         for (int i = 0; i < newSimplexes.size(); i ++) {
@@ -71,6 +65,13 @@ public class Splitter<T extends MultiPoint<T>> {
         }
         if (simplex.getLock().getAndSet(1) == 1) {
             throw new RuntimeException("retry");
+        }
+
+        for (LinkedSimplex<T> s : newSimplexes) {
+            if (s.getValue() != null && simplexValue.equals(s.getValue())) {
+                s.setSelf(simplex.getSelf());
+                s.getSelf().set(s);
+            }
         }
 
         for (int i = 0; i < fromLinks.size(); i ++) {
