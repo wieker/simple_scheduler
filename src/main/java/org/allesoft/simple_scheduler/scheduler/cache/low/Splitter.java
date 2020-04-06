@@ -84,7 +84,7 @@ public class Splitter<T extends MultiPoint<T>> {
             newSimplexes.get(i).getLock().set(0);
         }
 
-        return newSimplexes.stream().filter(s -> s.getValue() != null && point.equals(s.getValue())).findFirst().map(LinkedSimplex::getSelf).orElse(null);
+        return newSimplexes.stream().filter(s -> s.getValue() != null && point.equals(s.getValue())).findFirst().map(LinkedSimplex::getSelf).orElseThrow(RuntimeException::new);
     }
 
     public List<List<T>> tryBorders(T median, LinkedSimplex<T> simplex) {
@@ -128,12 +128,19 @@ public class Splitter<T extends MultiPoint<T>> {
     }
 
     public List<T> newValues(T point, LinkedSimplex<T> simplex, List<List<T>> newBorders) {
+        if (point == null) {
+            throw new RuntimeException("null point");
+        }
         AtomicReference<T> newValue = new AtomicReference<>(simplex.getValue());
         AtomicReference<T> pointValue = new AtomicReference<>(point);
-        return newBorders.stream().map(newBoundaries -> {
-                return simplex.getValue().inSimplex(newBoundaries) ? newValue.getAndSet(null) :
-                        point.inSimplex(newBoundaries) ? pointValue.getAndSet(null) : null;
-            }).collect(Collectors.toList());
+        List<T> result = newBorders.stream().map(newBoundaries -> {
+            return simplex.getValue() != null && simplex.getValue().inSimplex(newBoundaries) ? newValue.getAndSet(null) :
+                    point.inSimplex(newBoundaries) ? pointValue.getAndSet(null) : null;
+        }).collect(Collectors.toList());
+        if (pointValue.get() != null) {
+            throw new RuntimeException("no such point");
+        }
+        return result;
     }
 
     public List<List<T>> newBorders(T median, List<List<T>> oldNeighBorders) {

@@ -76,20 +76,20 @@ public class Gra {
         window.add(canvas);
 
 
-//        for (int i = 1; i < 100; i += 10) {
-//            for (int j = 1; j < 100 - i; j += 10) {
-//                try {
-//                    simplex.set(simplex.get().insert(MultiPointImplTwo.cmp(i, j)));
-//                } catch (NullPointerException e) {
-//
-//                }
-//                canvas.repaint();
-//                try {
-//                    Thread.sleep(100);
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        }
+        for (int i = 1; i < 100; i += 10) {
+            for (int j = 1; j < 100 - i; j += 10) {
+                try {
+                    simplex.get().insert(MultiPointImplTwo.cmp(i, j));
+                } catch (NullPointerException e) {
+
+                }
+                canvas.repaint();
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 }
