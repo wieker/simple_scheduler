@@ -6,17 +6,17 @@ import java.util.Iterator;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static java.lang.Integer.max;
-import static java.lang.Integer.min;
+import static java.lang.Double.max;
+import static java.lang.Double.min;
 
 public class MultiPointImplOne extends MultiPoint<MultiPointImplOne> {
-    final private int pos;
+    final private double pos;
 
-    public MultiPointImplOne(int pos) {
+    public MultiPointImplOne(double pos) {
         this.pos = pos;
     }
 
-    public int getPos() {
+    public double getPos() {
         return pos;
     }
 
@@ -34,8 +34,8 @@ public class MultiPointImplOne extends MultiPoint<MultiPointImplOne> {
     public boolean inSimplex(Collection<MultiPointImplOne> boundaries) {
         MultiPointImplOne point = (MultiPointImplOne) this;
         Iterator<MultiPointImplOne> iterator = boundaries.iterator();
-        int a = ((MultiPointImplOne)iterator.next()).getPos();
-        int b = ((MultiPointImplOne)iterator.next()).getPos();
+        double a = ((MultiPointImplOne)iterator.next()).getPos();
+        double b = ((MultiPointImplOne)iterator.next()).getPos();
         return point.getPos() >= min(a, b) && point.getPos() < max(a, b);
     }
 
@@ -43,15 +43,15 @@ public class MultiPointImplOne extends MultiPoint<MultiPointImplOne> {
     public Optional<AtomicReference<LinkedSimplex<MultiPointImplOne>>> bestNeighbour(LinkedSimplex<MultiPointImplOne> simplexLinkedGraphOne) {
         MultiPointImplOne point = (MultiPointImplOne) this;
         return point.getPos() < simplexLinkedGraphOne.getValue().getPos() ?
-                simplexLinkedGraphOne.getNeighbours().stream().filter(n -> ((MultiPointImplOne) n.get().getValue()).getPos() < simplexLinkedGraphOne.getValue().getPos()).min(Comparator.comparingInt(n -> ((MultiPointImplOne) n.get().getValue()).getPos())) :
-                simplexLinkedGraphOne.getNeighbours().stream().filter(n -> ((MultiPointImplOne) n.get().getValue()).getPos() > simplexLinkedGraphOne.getValue().getPos()).max(Comparator.comparingInt(n -> ((MultiPointImplOne) n.get().getValue()).getPos()));
+                simplexLinkedGraphOne.getNeighbours().stream().filter(n -> n != null && n.get() != null).filter(n -> ((MultiPointImplOne) n.get().getValue()).getPos() < simplexLinkedGraphOne.getValue().getPos()).min(Comparator.comparingDouble(n -> ((MultiPointImplOne) n.get().getValue()).getPos())) :
+                simplexLinkedGraphOne.getNeighbours().stream().filter(n -> n != null && n.get() != null).filter(n -> ((MultiPointImplOne) n.get().getValue()).getPos() > simplexLinkedGraphOne.getValue().getPos()).max(Comparator.comparingDouble(n -> ((MultiPointImplOne) n.get().getValue()).getPos()));
     }
 
     @Override
     public MultiPointImplOne median(MultiPointImplOne aPoint, MultiPointImplOne bPoint, LinkedSimplex<MultiPointImplOne> simplex, Splitter<MultiPointImplOne> splitter) {
         MultiPointImplOne a = (MultiPointImplOne) aPoint;
         MultiPointImplOne b = (MultiPointImplOne) bPoint;
-        return new MultiPointImplOne(Math.max(a.getPos(), b.getPos()));
+        return new MultiPointImplOne((a.getPos() + b.getPos()) / 2);
     }
 
     @Override

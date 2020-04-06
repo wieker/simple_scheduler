@@ -43,6 +43,9 @@ public class Splitter<T extends MultiPoint<T>> {
             }
         }
         List<List<T>> newBorders = newBorders(median, oldNeighBorders);
+        for (List<T> border : newBorders) {
+            System.out.println(border);
+        }
         List<T> newValues = newValues(point, simplex, newBorders);
         List<LinkedSimplex<T>> newSimplexes = newSimplexes(newBorders, newValues);
         newNexts(newSimplexes, next, point);

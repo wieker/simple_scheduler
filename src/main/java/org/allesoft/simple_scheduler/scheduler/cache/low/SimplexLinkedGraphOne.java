@@ -14,25 +14,25 @@ public class SimplexLinkedGraphOne extends LinkedSimplex<MultiPointImplOne> {
 
     @Override
     public String toString() {
-        return " [ " + getBoundaries().stream().map(point -> ((MultiPointImplOne) point).getPos()).min(Integer::compare).orElseThrow(RuntimeException::new) + " " + getValue() + " " + getBoundaries().stream().map(point -> ((MultiPointImplOne) point).getPos()).max(Integer::compare).orElseThrow(RuntimeException::new) + " ] ";
+        return " [ " + getBoundaries().stream().map(point -> ((MultiPointImplOne) point).getPos()).min(Double::compare).orElseThrow(RuntimeException::new) + " " + getValue() + " " + getBoundaries().stream().map(point -> ((MultiPointImplOne) point).getPos()).max(Double::compare).orElseThrow(RuntimeException::new) + " ] ";
     }
 
     public static void main(String[] args) {
         for (int i = 0; i < 100; i ++) {
-            LinkedSimplex<MultiPointImplOne> linkedSimplex = createForLayer(0);
+            AtomicReference<LinkedSimplex<MultiPointImplOne>> self = createForLayer(0).getSelf();
 
-            linkedSimplex.insert(new MultiPointImplOne(20));
-            linkedSimplex.insert(new MultiPointImplOne(28));
-            linkedSimplex.insert(new MultiPointImplOne(24));
-            linkedSimplex.insert(new MultiPointImplOne(9));
-            linkedSimplex.insert(new MultiPointImplOne(2));
-            linkedSimplex.insert(new MultiPointImplOne(22));
-            linkedSimplex.insert(new MultiPointImplOne(48));
-            linkedSimplex.insert(new MultiPointImplOne(49));
+            self.get().insert(new MultiPointImplOne(20));
+            self.get().insert(new MultiPointImplOne(28));
+            self.get().insert(new MultiPointImplOne(24));
+            self.get().insert(new MultiPointImplOne(9));
+            self.get().insert(new MultiPointImplOne(2));
+            self.get().insert(new MultiPointImplOne(22));
+            self.get().insert(new MultiPointImplOne(48));
+            self.get().insert(new MultiPointImplOne(49));
 
-            print(linkedSimplex.search(new MultiPointImplOne(1), 0).get(), new HashSet<>());
-            print(linkedSimplex.search(new MultiPointImplOne(1), 1).get(), new HashSet<>());
-            print(linkedSimplex.search(new MultiPointImplOne(1), 2).get(), new HashSet<>());
+            print(self.get().search(new MultiPointImplOne(1), 0).get(), new HashSet<>());
+            print(self.get().search(new MultiPointImplOne(1), 1).get(), new HashSet<>());
+            print(self.get().search(new MultiPointImplOne(1), 2).get(), new HashSet<>());
         }
     }
 
@@ -40,7 +40,7 @@ public class SimplexLinkedGraphOne extends LinkedSimplex<MultiPointImplOne> {
         System.out.println(linkedSimplex);
         e.add(linkedSimplex);
         for (AtomicReference<LinkedSimplex<MultiPointImplOne>> simplex : linkedSimplex.getNeighbours()) {
-            if (!e.contains(simplex)) {
+            if (simplex != null && !e.contains(simplex.get())) {
                 print(simplex.get(), e);
             }
         }
