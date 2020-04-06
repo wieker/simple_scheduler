@@ -17,12 +17,12 @@ public class ConcurrentTransactionManager {
             }
         }
         for (int i = 0; i < listToUpdate.size(); i ++) {
-            listToUpdate.get(i).set(newValues.get(i));
+            ((AtomicReference<Object>) listToUpdate.get(i)).set(newValues.get(i));
         }
         cleanup(readLocks, writeLocks.size());
     }
 
-    private void cleanup(List<Lockable> orderedList, int width) {
+    private void cleanup(List<? extends Lockable> orderedList, int width) {
         for (int j = 0; j < width; j ++) {
             orderedList.get(j).getLock().set(0);
         }

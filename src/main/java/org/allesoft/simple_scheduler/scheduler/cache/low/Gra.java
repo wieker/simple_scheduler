@@ -24,11 +24,22 @@ public class Gra {
         AtomicReference<LinkedSimplex<MultiPointImplTwo>> simplex = forLayer.getSelf();
 
         JComponent canvas = new JComponent() {
+            int centerY = getHeight() / 4;
+            int centerX = getWidth() / 4;
+
             @Override
             protected void paintComponent(Graphics g) {
                 LinkedSimplex<MultiPointImplTwo> initial = simplex.get();
                 Set<LinkedSimplex<MultiPointImplTwo>> passed = new HashSet<>();
                 draw(g, initial, passed);
+                centerX *= 2;
+                passed = new HashSet<>();
+                draw(g, initial.getNextLayer().get(), passed);
+                centerY *= 2;
+                passed = new HashSet<>();
+                draw(g, initial.getNextLayer().get().getNextLayer().get(), passed);
+                centerY = getHeight() / 4;
+                centerX = getWidth() / 4;
             }
 
             private void draw(Graphics g, LinkedSimplex<MultiPointImplTwo> simplex, Set<LinkedSimplex<MultiPointImplTwo>> passed) {
@@ -38,8 +49,6 @@ public class Gra {
                 for (int i = 0; i < size; i++) {
                     MultiPointImplTwo curr = (MultiPointImplTwo) boundaries.get(i);
                     MultiPointImplTwo next = (MultiPointImplTwo) boundaries.get((i + 1) % size);
-                    int centerY = getHeight() / 4;
-                    int centerX = getWidth() / 4;
                     double scale = 5;
                     g.drawLine(centerX + (int) (curr.getX() * scale), centerY + (int) (curr.getY() * scale), centerX + (int) (next.getX() * scale), centerY + (int) (next.getY() * scale));
                 }
@@ -60,6 +69,7 @@ public class Gra {
                 int centerX = canvas.getWidth() / 4;
                 double scale = 5;
                 simplex.get().insert(cmp((e.getX() - centerX) / scale, (e.getY() - centerY) / scale)).get();
+                System.out.println(simplex.get());
                 canvas.repaint();
             }
         });

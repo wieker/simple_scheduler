@@ -11,6 +11,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class LinkedSimplex<T extends MultiPoint<T>> {
     static final int DIMENSIONS = 2;
@@ -48,6 +49,8 @@ public class LinkedSimplex<T extends MultiPoint<T>> {
     AtomicReference<LinkedSimplex<T>>  search(T point, int layer,
                             BiFunction<LinkedSimplex<T>, AtomicReference<LinkedSimplex<T>> , AtomicReference<LinkedSimplex<T>> > processor,
                             Function<AtomicReference<LinkedSimplex<T>> , AtomicReference<LinkedSimplex<T>> > finalProcesor) {
+        System.out.println("search: " + point + " in " + this.toString());
+        System.out.println("level: " + layer);
         if (point.inSimplex(this.getBoundaries())) {
             if (layer < LAYERS - 1) {
                 try {
@@ -71,6 +74,7 @@ public class LinkedSimplex<T extends MultiPoint<T>> {
     }
 
     protected static <E extends MultiPoint<E>> LinkedSimplex<E> newInstance(List<E> border, Splitter<E> splitter) {
+        System.out.println("new simplex: " + border);
         return new LinkedSimplex<E>(null, new AtomicReference<>(), new ArrayList<>(border), null, splitter);
     }
 
@@ -111,8 +115,10 @@ public class LinkedSimplex<T extends MultiPoint<T>> {
 
     private AtomicReference<LinkedSimplex<T>>  splitUpperLevelSimplex(T point, AtomicReference<LinkedSimplex<T>>  newSimplex, AtomicBoolean grow) {
         if (grow.get() && new Random().nextBoolean()) {
+            System.out.println("split upper");
             return split(point, newSimplex, splitter);
         }
+        System.out.println("change upper");
         this.setNextLayer(newSimplex.get().search(point.getSimplexMedian(this), LAYERS));
         grow.set(false);
         return this.getSelf();
@@ -148,5 +154,10 @@ public class LinkedSimplex<T extends MultiPoint<T>> {
 
     public void setSelf(AtomicReference<LinkedSimplex<T>> self) {
         this.self = self;
+    }
+
+    @Override
+    public String toString() {
+        return " [ " + getBoundaries().stream().map(Object::toString).collect(Collectors.joining()) + " / " + getValue()  + " ] ";
     }
 }

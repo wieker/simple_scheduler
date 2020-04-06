@@ -172,14 +172,14 @@ public class MultiPointImplTwo extends MultiPoint<MultiPointImplTwo> {
         MultiPointImplTwo stdMedian = stdMedian(a, b);
         for (int i = 0; i < boundary.size(); i ++) {
             MultiPointImplTwo z = boundary.get(i);
-            while (collinear(stdMedian, b, z)) {
+            while (collinear(stdMedian, b, z) || !stdMedian.inSimplex(boundary)) {
                 Random random = new Random();
                 stdMedian = cmp(stdMedian.getX() + ((double)random.nextInt(100)) / 100_000, stdMedian.getY() + ((double)random.nextInt(100)) / 100_000);
             }
         }
         for (int i = 0; i < boundary.size(); i ++) {
             MultiPointImplTwo z = boundary.get(i);
-            if (collinear(a, stdMedian, z)) {
+            if (collinear(a, stdMedian, z) || !stdMedian.inSimplex(boundary)) {
                 Random random = new Random();
                 stdMedian = cmp(stdMedian.getX() + ((double)random.nextInt(100)) / 100_000, stdMedian.getY() + ((double)random.nextInt(100)) / 100_000);
             }
