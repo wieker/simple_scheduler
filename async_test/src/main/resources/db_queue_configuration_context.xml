@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:task="http://www.springframework.org/schema/task"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+		http://www.springframework.org/schema/beans/spring-beans-2.5.xsd http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd">
+
+    <task:executor id="queueFillExecutor" pool-size="20"/>
+    <task:scheduler id="queueScheduler" pool-size="10"/>
+
+    <task:scheduled-tasks scheduler="queueScheduler">
+        <task:scheduled ref="asyncPersist" method="flush" fixed-delay="5000"/>
+        <task:scheduled ref="queueFiller" method="fill" fixed-delay="5000"/>
+    </task:scheduled-tasks>
+
+    <bean name="asyncPersist" class="org.allesoft.enterprise_db.AsyncPersistServiceImpl">
+        <constructor-arg name="batchSize" value="10"/>
+        <constructor-arg name="dataQueue" ref="dataQueue"/>
+        <constructor-arg name="persistenceDao" ref="persist"/>
+        <constructor-arg name="controlQueue" ref="controlQueue"/>
+    </bean>
+
+    <bean name="persist" class="org.allesoft.enterprise_db.PersistenceDaoImpl"/>
+    <bean name="queueProvider" class="org.allesoft.enterprise_db.StorageQueueProvider"/>
+    <bean name="fillerProvider" class="org.allesoft.enterprise_db.QueueFillerProvider"/>
+    <bean name="dataQueue" class="java.util.concurrent.ConcurrentLinkedQueue" factory-bean="queueProvider" factory-method="createQueue"/>
+    <bean name="controlQueue" class="java.util.concurrent.ConcurrentLinkedQueue" factory-bean="queueProvider" factory-method="controlQueue"/>
+
+    <bean name="queueFiller" class="org.allesoft.enterprise_db.QueueFrontServiceImpl">
+        <constructor-arg ref="queueFillExecutor"/>
+        <constructor-arg value="20"/>
+    </bean>
+
+    <bean name="filler" scope="prototype" factory-bean="fillerProvider" factory-method="filler">
+        <constructor-arg name="dataQueue" ref="dataQueue"/>
+        <constructor-arg name="controlQueue" ref="controlQueue"/>
+        <constructor-arg name="pushSize" value="100"/>
+    </bean>
+
+</beans>
